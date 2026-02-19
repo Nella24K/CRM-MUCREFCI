@@ -1,0 +1,17 @@
+<div class="layout-container">
+  <!-- Overlay pour mobile -->
+  <div class="sidebar-overlay" 
+       [class.active]="showOverlay" 
+       (click)="closeSidebar()"
+       *ngIf="showOverlay"></div>
+  
+  <app-sidebar [collapsed]="isSidebarCollapsed" (toggle)="toggleSidebar()" />
+  
+  <div class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
+    <app-header (toggleSidebar)="toggleSidebar()" />
+    
+    <main class="content-area">
+      <router-outlet />
+    </main>
+  </div>
+</div>

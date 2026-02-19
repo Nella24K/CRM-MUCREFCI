@@ -1,0 +1,78 @@
+<div class="email-display" *ngIf="emailSource">
+  <div class="email-header">
+    <h3 class="email-title">Email source</h3>
+  </div>
+
+  <div class="email-info-grid">
+    <!-- De -->
+    <div class="email-info-item">
+      <div class="email-label">
+        <svg class="email-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="L22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        De
+      </div>
+      <div class="email-value">
+        <span *ngIf="emailSource.fromName" class="email-name">{{ emailSource.fromName }}</span>
+        <span class="email-address">{{ emailSource.from }}</span>
+      </div>
+    </div>
+
+    <!-- À -->
+    <div class="email-info-item">
+      <div class="email-label">
+        <svg class="email-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="L22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        À
+      </div>
+      <div class="email-value">{{ emailSource.to }}</div>
+    </div>
+
+    <!-- Date -->
+    <div class="email-info-item">
+      <div class="email-label">
+        <svg class="email-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Date de réception
+      </div>
+      <div class="email-value">{{ formatDate(emailSource.dateReception) }}</div>
+    </div>
+
+    <!-- CC -->
+    <div class="email-info-item" *ngIf="emailSource.cc && emailSource.cc.length > 0">
+      <div class="email-label">CC</div>
+      <div class="email-value">
+        <span *ngFor="let cc of emailSource.cc; let last = last">
+          {{ cc }}<span *ngIf="!last">, </span>
+        </span>
+      </div>
+    </div>
+
+    <!-- BCC -->
+    <div class="email-info-item" *ngIf="emailSource.bcc && emailSource.bcc.length > 0">
+      <div class="email-label">BCC</div>
+      <div class="email-value">
+        <span *ngFor="let bcc of emailSource.bcc; let last = last">
+          {{ bcc }}<span *ngIf="!last">, </span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Objet -->
+  <div class="email-subject">
+    <div class="email-label">Objet</div>
+    <div class="email-subject-value">{{ emailSource.subject }}</div>
+  </div>
+
+  <!-- Corps du message -->
+  <div class="email-body">
+    <div class="email-label">Message</div>
+    <div class="email-body-content">{{ emailSource.body }}</div>
+  </div>
+</div>

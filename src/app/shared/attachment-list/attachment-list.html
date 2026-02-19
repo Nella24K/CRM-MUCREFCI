@@ -1,0 +1,41 @@
+<div class="attachment-list" *ngIf="attachments && attachments.length > 0">
+  <div class="attachment-header">
+    <h3 class="attachment-title">Pièces jointes</h3>
+    <span class="attachment-count">{{ attachments.length }} fichier(s)</span>
+  </div>
+
+  <div class="attachments-grid">
+    <div *ngFor="let attachment of attachments" class="attachment-item">
+      <div class="attachment-icon">
+        <span class="file-icon">{{ getFileIcon(attachment.extension) }}</span>
+        <span class="scan-badge" *ngIf="isScanned(attachment)" title="Fichier scanné et sécurisé">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 11.08V12C22 16.9706 17.9706 21 12 21C6.02944 21 2 16.9706 2 12C2 7.02944 6.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 11L11 13L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+      
+      <div class="attachment-info">
+        <div class="attachment-name" [title]="attachment.nomFichier">
+          {{ attachment.nomFichier }}
+        </div>
+        <div class="attachment-meta">
+          <span class="attachment-size">{{ formatTaille(attachment.taille) }}</span>
+          <span class="attachment-type">{{ attachment.extension.toUpperCase() }}</span>
+          <span class="attachment-converted" *ngIf="attachment.converti" title="Fichier converti">
+            (converti)
+          </span>
+        </div>
+      </div>
+
+      <button class="attachment-download" (click)="onDownload(attachment)" title="Télécharger">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

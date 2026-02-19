@@ -1,0 +1,282 @@
+<div class="ticket-detail-page" *ngIf="ticket">
+  <!-- Header avec bouton retour -->
+  <div class="page-header">
+    <button class="btn-back" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Retour</span>
+    </button>
+    <div class="header-actions">
+      <button class="btn-action" (click)="showStatusModal = true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18.5 2.5C18.8978 2.10218 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10218 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10218 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Modifier le statut
+      </button>
+      <button class="btn-action btn-primary" (click)="showResponseModal = true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Répondre
+      </button>
+      <button class="btn-action btn-danger" (click)="showCloseModal = true" *ngIf="ticket.statut !== 'clos'">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 11.08V12C22 16.9706 17.9706 21 12 21C6.02944 21 2 16.9706 2 12C2 7.02944 6.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 11L11 13L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Clôturer
+      </button>
+    </div>
+  </div>
+
+  <div class="ticket-content">
+    <!-- Informations principales -->
+    <div class="ticket-main">
+      <!-- En-tête du ticket -->
+      <div class="ticket-header">
+        <div class="ticket-title-section">
+          <h1 class="ticket-reference">{{ ticket.reference }}</h1>
+          <h2 class="ticket-objet">{{ ticket.objet }}</h2>
+        </div>
+        <div class="ticket-badges">
+          <span class="status-badge" [ngClass]="getStatusClass(ticket.statut)">
+            {{ ticket.statut }}
+          </span>
+          <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priorite)">
+            {{ ticket.priorite }}
+          </span>
+          <span class="canal-badge canal-{{ ticket.canal }}">
+            {{ ticket.canal }}
+          </span>
+          <span class="email-badge" *ngIf="ticket.creeParEmail" title="Ticket créé automatiquement par email">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="L22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Créé par email
+          </span>
+          <span class="sla-badge" [ngClass]="{'sla-overdue': isSLAOverdue()}" *ngIf="ticket.dateEcheanceSLA">
+            SLA: {{ formatDate(ticket.dateEcheanceSLA) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Informations détaillées -->
+      <div class="ticket-info-grid">
+        <div class="info-card">
+          <div class="info-label">Client</div>
+          <div class="info-value">{{ ticket.clientNom }}</div>
+        </div>
+        <div class="info-card">
+          <div class="info-label">Catégorie</div>
+          <div class="info-value">{{ ticket.categorie }}</div>
+          <div class="info-subvalue" *ngIf="ticket.sousCategorie">{{ ticket.sousCategorie }}</div>
+        </div>
+        <div class="info-card">
+          <div class="info-label">Assigné à</div>
+          <div class="info-value">
+            {{ ticket.assigneANom || 'Non assigné' }}
+            <button class="btn-assign" *ngIf="!ticket.assigneA" (click)="assignToAgent('agent1')">
+              Assigner
+            </button>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-label">Date de création</div>
+          <div class="info-value">{{ formatDate(ticket.dateCreation) }}</div>
+        </div>
+        <div class="info-card" *ngIf="ticket.datePremiereReponse">
+          <div class="info-label">Première réponse</div>
+          <div class="info-value">{{ formatDate(ticket.datePremiereReponse) }}</div>
+          <div class="info-subvalue">Temps: {{ formatTemps(ticket.tempsReponse) }}</div>
+        </div>
+        <div class="info-card" *ngIf="ticket.dateResolution">
+          <div class="info-label">Date de résolution</div>
+          <div class="info-value">{{ formatDate(ticket.dateResolution) }}</div>
+        </div>
+        <div class="info-card" *ngIf="ticket.satisfaction">
+          <div class="info-label">Satisfaction client</div>
+          <div class="info-value">
+            <div class="satisfaction-stars">
+              <span *ngFor="let i of [1,2,3,4,5]" class="star" [class.active]="i <= ticket.satisfaction">
+                ★
+              </span>
+            </div>
+            <span class="satisfaction-note">{{ ticket.satisfaction }}/5</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Email source (si créé par email) -->
+      <div class="email-source-section" *ngIf="ticket.creeParEmail && ticket.emailSource">
+        <app-email-display [emailSource]="ticket.emailSource"></app-email-display>
+      </div>
+
+      <!-- Pièces jointes -->
+      <div class="attachments-section" *ngIf="ticket.piecesJointes && ticket.piecesJointes.length > 0">
+        <app-attachment-list 
+          [attachments]="ticket.piecesJointes"
+          (download)="downloadAttachment($event)">
+        </app-attachment-list>
+      </div>
+
+      <!-- Notes internes -->
+      <div class="notes-section" *ngIf="ticket.notesInternes && ticket.notesInternes.length > 0">
+        <h3>Notes internes</h3>
+        <div class="notes-list">
+          <div *ngFor="let note of ticket.notesInternes" class="note-item">
+            <p>{{ note }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions rapides -->
+      <div class="quick-actions">
+        <button class="btn-quick-action" (click)="showNoteModal = true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18.5 2.5C18.8978 2.10218 19.4374 1.87868 20 1.87868C20.5626 1.87868 21.1022 2.10218 21.5 2.5C21.8978 2.89782 22.1213 3.43739 22.1213 4C22.1213 4.56261 21.8978 5.10218 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Ajouter une note
+        </button>
+        <button class="btn-quick-action" (click)="showResponseModal = true">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Répondre
+        </button>
+      </div>
+    </div>
+
+    <!-- Historique des actions -->
+    <div class="ticket-history">
+      <h3>Historique des actions</h3>
+      <div class="history-timeline">
+        <div *ngFor="let action of actions" class="history-item">
+          <div class="history-icon" [ngClass]="'icon-' + action.type">
+            <svg *ngIf="action.type === 'status_change'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg *ngIf="action.type === 'note'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg *ngIf="action.type === 'response'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg *ngIf="action.type === 'closure'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C22 16.9706 17.9706 21 12 21C6.02944 21 2 16.9706 2 12C2 7.02944 6.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9 11L11 13L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="history-content">
+            <div class="history-description">{{ action.description }}</div>
+            <div class="history-meta">
+              <span class="history-user">{{ action.user }}</span>
+              <span class="history-date">{{ formatDate(action.date) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal modification statut -->
+  <div class="modal-overlay" *ngIf="showStatusModal" (click)="showStatusModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Modifier le statut</h2>
+        <button class="modal-close" (click)="showStatusModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <select [(ngModel)]="newStatus" class="form-input">
+          <option value="nouveau">Nouveau</option>
+          <option value="en_cours">En cours</option>
+          <option value="en_attente">En attente</option>
+          <option value="en_attente_client">En attente client</option>
+          <option value="resolu">Résolu</option>
+          <option value="clos">Clos</option>
+        </select>
+        <div class="form-actions">
+          <button class="btn-cancel" (click)="showStatusModal = false">Annuler</button>
+          <button class="btn-submit" (click)="updateStatus()">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal réponse -->
+  <div class="modal-overlay" *ngIf="showResponseModal" (click)="showResponseModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Envoyer une réponse</h2>
+        <button class="modal-close" (click)="showResponseModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Canal</label>
+          <select [(ngModel)]="responseCanal" class="form-input">
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea [(ngModel)]="responseMessage" class="form-input" rows="6" placeholder="Saisissez votre message..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel" (click)="showResponseModal = false">Annuler</button>
+          <button class="btn-submit" (click)="sendResponse()">Envoyer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal note interne -->
+  <div class="modal-overlay" *ngIf="showNoteModal" (click)="showNoteModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Ajouter une note interne</h2>
+        <button class="modal-close" (click)="showNoteModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Note</label>
+          <textarea [(ngModel)]="noteInterne" class="form-input" rows="4" placeholder="Saisissez votre note..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel" (click)="showNoteModal = false">Annuler</button>
+          <button class="btn-submit" (click)="addNote()">Ajouter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal clôture -->
+  <div class="modal-overlay" *ngIf="showCloseModal" (click)="showCloseModal = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Clôturer le ticket</h2>
+        <button class="modal-close" (click)="showCloseModal = false">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Note de satisfaction (optionnel)</label>
+          <div class="satisfaction-input">
+            <button *ngFor="let i of [1,2,3,4,5]" 
+                    class="star-btn" 
+                    [class.active]="i <= satisfactionNote"
+                    (click)="satisfactionNote = i">
+              ★
+            </button>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-cancel" (click)="showCloseModal = false">Annuler</button>
+          <button class="btn-submit btn-danger" (click)="closeTicket()">Clôturer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

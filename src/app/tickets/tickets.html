@@ -1,0 +1,164 @@
+<div class="tickets-page">
+  <!-- En-tête -->
+  <div class="tickets-header">
+    <div class="header-title">
+      <h1>TICKETS</h1>
+      <p class="subtitle">Gestion des demandes clients</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat-card">
+        <div class="stat-value">{{ tickets.length }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ ticketsFiltres.length }}</div>
+        <div class="stat-label">Filtrés</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de recherche et filtres -->
+  <div class="filters-section">
+    <div class="search-container">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+        <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Rechercher par référence, objet ou client..."
+        [(ngModel)]="recherche"
+        (input)="onRechercheChange()"
+      />
+    </div>
+
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label class="filter-label">Statut</label>
+        <select class="filter-select" [(ngModel)]="filtreStatut" (change)="onFiltreChange()">
+          <option value="tous">Tous les statuts</option>
+          <option value="nouveau">Nouveau</option>
+          <option value="en_cours">En cours</option>
+          <option value="en_attente">En attente</option>
+          <option value="en_attente_client">En attente client</option>
+          <option value="resolu">Résolu</option>
+          <option value="clos">Clos</option>
+          <option value="en_retard">En retard</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Priorité</label>
+        <select class="filter-select" [(ngModel)]="filtrePriorite" (change)="onFiltreChange()">
+          <option value="toutes">Toutes les priorités</option>
+          <option value="basse">Basse</option>
+          <option value="normale">Normale</option>
+          <option value="haute">Haute</option>
+          <option value="urgente">Urgente</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Canal</label>
+        <select class="filter-select" [(ngModel)]="filtreCanal" (change)="onFiltreChange()">
+          <option value="tous">Tous les canaux</option>
+          <option value="email">Email</option>
+          <option value="whatsapp">WhatsApp</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Source</label>
+        <select class="filter-select" [(ngModel)]="filtreCreeParEmail" (change)="onFiltreChange()">
+          <option [ngValue]="null">Toutes les sources</option>
+          <option [ngValue]="true">Créés par email</option>
+          <option [ngValue]="false">Autres sources</option>
+        </select>
+      </div>
+
+      <button class="btn-reset" (click)="resetFilters()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Liste des tickets -->
+  <div class="tickets-list" *ngIf="ticketsFiltres.length > 0">
+    <div *ngFor="let ticket of ticketsFiltres" class="ticket-card" (click)="viewTicket(ticket.id)">
+      <div class="ticket-card-header">
+        <div class="ticket-ref-section">
+          <span class="ticket-reference">{{ ticket.reference }}</span>
+          <span class="email-badge" *ngIf="ticket.creeParEmail" title="Ticket créé automatiquement par email">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="L22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Créé par email
+          </span>
+        </div>
+        <div class="ticket-badges">
+          <span class="status-badge" [ngClass]="getStatusClass(ticket.statut)">
+            {{ getStatutLabel(ticket.statut) }}
+          </span>
+          <span class="priority-badge" [ngClass]="getPriorityClass(ticket.priorite)">
+            {{ getPrioriteLabel(ticket.priorite) }}
+          </span>
+          <span class="canal-badge canal-{{ ticket.canal }}">
+            {{ ticket.canal }}
+          </span>
+        </div>
+      </div>
+
+      <div class="ticket-card-body">
+        <h3 class="ticket-objet">{{ ticket.objet }}</h3>
+        <div class="ticket-meta">
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span>{{ ticket.clientNom }}</span>
+          </div>
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ formatDate(ticket.dateCreation) }}</span>
+          </div>
+          <div class="meta-item" *ngIf="ticket.assigneANom">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              <path d="M17 11L19 13L23 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ ticket.assigneANom }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucun ticket -->
+  <div class="empty-state" *ngIf="ticketsFiltres.length === 0">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h3>Aucun ticket trouvé</h3>
+    <p *ngIf="recherche || filtreStatut !== 'tous' || filtrePriorite !== 'toutes' || filtreCanal !== 'tous' || filtreCreeParEmail !== null">
+      Aucun ticket ne correspond à vos critères de recherche.
+    </p>
+    <p *ngIf="!recherche && filtreStatut === 'tous' && filtrePriorite === 'toutes' && filtreCanal === 'tous' && filtreCreeParEmail === null">
+      Aucun ticket n'a été créé pour le moment.
+    </p>
+  </div>
+</div>
