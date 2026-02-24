@@ -8,6 +8,7 @@ import { TicketDetail } from './tickets/ticket-detail/ticket-detail';
 import { Supervision } from './supervision/supervision';
 import { Satisfaction } from './satisfaction/satisfaction';
 import { Profil } from './profil/profil';
+import { Users } from './users/users';
 
 export const routes: Routes = [
   {
@@ -54,6 +55,10 @@ export const routes: Routes = [
       {
         path: 'profil',
         component: Profil
+      },
+      {
+        path: 'users',
+        component: Users
       },
       {
         path: '',

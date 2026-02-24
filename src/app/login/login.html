@@ -1,15 +1,15 @@
 ﻿<div class="login-container">
-  <!-- Image NGSER Ã  gauche -->
+  <!-- Image NGSER à gauche -->
   <div class="login-image-section">
     <img src="/images/ngser-logo.png" alt="NGSER Logo" class="ngser-full-image" />
   </div>
 
-  <!-- Formulaire de connexion Ã  droite -->
+  <!-- Formulaire de connexion à droite -->
   <div class="login-form-section">
     <div class="login-card">
       <div class="card-header">
         <h2 class="card-title">Connexion</h2>
-        <p class="card-description">Connectez-vous pour acceder a votre espace</p>
+        <p class="card-description">Connectez-vous pour accéder à votre espace</p>
       </div>
 
       <form class="login-form" (ngSubmit)="onSubmit()">
@@ -20,7 +20,7 @@
               <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="L22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Adresse email 
+            Adresse email
           </label>
           <input
             type="email"
@@ -45,10 +45,10 @@
           </label>
           <div class="password-input-wrapper">
             <input
-              [type]="showPassword ? 'text' : 'password'"
+              [type]="showPassword ? 'text' : 'password'" 
               id="password"
               class="form-input"
-              placeholder="Votre mot de passe"
+              placeholder="••••••••"
               [(ngModel)]="password"
               name="password"
               required
@@ -62,7 +62,7 @@
             >
               <svg *ngIf="!showPassword" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" strclearoke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
               <svg *ngIf="showPassword" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C7 20 2.73 16.39 1 12C2.73 7.61 7 4 12 4C16.39 4 20.73 7.61 23 12C22.28 13.9 21.22 15.68 19.88 17.24M9.9 4.24A9.12 9.12 0 0 1 12 4C16.39 4 20.73 7.61 23 12C22.28 13.9 21.22 15.68 19.88 17.24M14.12 14.12A3 3 0 0 1 12 15C10.34 15 9 13.66 9 12C9 10.34 10.34 9 12 9C13.66 9 15 10.34 15 12C15 12.34 14.94 12.67 14.83 13M1 1L23 23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

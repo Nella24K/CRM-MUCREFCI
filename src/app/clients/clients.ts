@@ -24,6 +24,24 @@ export class Clients implements OnInit {
   // Options de filtres
   statuts = ['tous', 'actif', 'inactif', 'prospect'];
 
+  // Modal création client
+  showCreateModal: boolean = false;
+  isCreating: boolean = false;
+  newClient = {
+    nom: '',
+    prenom: '',
+    entreprise: '',
+    email: '',
+    telephone: '',
+    adresse: '',
+    ville: '',
+    codePostal: '',
+    pays: '',
+    secteur: '',
+    statut: 'prospect' as 'actif' | 'inactif' | 'prospect',
+    notes: ''
+  };
+
   constructor(
     private clientService: ClientService,
     private router: Router
@@ -133,5 +151,63 @@ export class Clients implements OnInit {
       return `${client.prenom} ${client.nom}`;
     }
     return client.nom || client.entreprise || 'Client sans nom';
+  }
+
+  // Ouvrir le modal de création
+  openCreateModal(): void {
+    this.showCreateModal = true;
+    // Réinitialiser le formulaire
+    this.newClient = {
+      nom: '',
+      prenom: '',
+      entreprise: '',
+      email: '',
+      telephone: '',
+      adresse: '',
+      ville: '',
+      codePostal: '',
+      pays: '',
+      secteur: '',
+      statut: 'prospect',
+      notes: ''
+    };
+  }
+
+  // Fermer le modal
+  closeCreateModal(): void {
+    this.showCreateModal = false;
+  }
+
+  // Créer un nouveau client
+  createClient(): void {
+    // Validation
+    if (!this.newClient.nom || !this.newClient.email) {
+      alert('Veuillez remplir au moins le nom et l\'email du client.');
+      return;
+    }
+
+    // Vérifier le format email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.newClient.email)) {
+      alert('Veuillez entrer une adresse email valide.');
+      return;
+    }
+
+    this.isCreating = true;
+
+    this.clientService.createClient(this.newClient).subscribe({
+      next: (client) => {
+        this.isCreating = false;
+        this.closeCreateModal();
+        // Recharger la liste des clients
+        this.loadClients();
+        alert(`Client "${this.getClientDisplayName(client)}" créé avec succès !`);
+      },
+      error: (error) => {
+        this.isCreating = false;
+        alert('Erreur lors de la création du client. Veuillez réessayer.');
+        console.error('Erreur création client:', error);
+      }
+    });
   }
 }

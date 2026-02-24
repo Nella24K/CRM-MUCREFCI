@@ -1,0 +1,302 @@
+<div class="users-page">
+  <!-- En-tête -->
+  <div class="users-header">
+    <div class="header-title">
+      <h1>GESTION DES UTILISATEURS</h1>
+      <p class="subtitle">Administration des utilisateurs du système</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-create-user" (click)="openCreateModal()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Nouvel utilisateur
+      </button>
+      <div class="header-stats">
+        <div class="stat-card">
+          <div class="stat-value">{{ users.length }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ usersFiltres.length }}</div>
+          <div class="stat-label">Filtrés</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de recherche et filtres -->
+  <div class="filters-section">
+    <div class="search-container">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+        <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Rechercher par nom, email ou équipe..."
+        [(ngModel)]="recherche"
+        (input)="onRechercheChange()"
+      />
+    </div>
+
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label class="filter-label">Rôle</label>
+        <select class="filter-select" [(ngModel)]="filtreRole" (change)="onFiltreChange()">
+          <option *ngFor="let role of roles" [value]="role.value">{{ role.label }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Statut</label>
+        <select class="filter-select" [(ngModel)]="filtreStatut" (change)="onFiltreChange()">
+          <option *ngFor="let statut of statuts" [value]="statut.value">{{ statut.label }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Équipe</label>
+        <select class="filter-select" [(ngModel)]="filtreEquipe" (change)="onFiltreChange()">
+          <option *ngFor="let equipe of equipes" [value]="equipe.value">{{ equipe.label }}</option>
+        </select>
+      </div>
+
+      <button class="btn-reset" (click)="resetFilters()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Liste des utilisateurs -->
+  <div class="users-list" *ngIf="usersFiltres.length > 0">
+    <div *ngFor="let user of usersFiltres" class="user-card">
+      <div class="user-card-header">
+        <div class="user-avatar">
+          <span>{{ user.prenom.charAt(0) }}{{ user.nom.charAt(0) }}</span>
+        </div>
+        <div class="user-info">
+          <h3 class="user-name">{{ getUserDisplayName(user) }}</h3>
+          <p class="user-email">{{ user.email }}</p>
+        </div>
+        <div class="user-badges">
+          <span class="role-badge" [ngClass]="'role-' + user.role">
+            {{ getRoleLabel(user.role) }}
+          </span>
+          <span class="statut-badge" [ngClass]="getStatutClass(user.statut)">
+            {{ getStatutLabel(user.statut) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="user-card-body">
+        <div class="user-details">
+          <div class="detail-item" *ngIf="user.telephone">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 16.92V19.92C22 20.52 21.52 21 20.92 21C9.4 21 0 11.6 0 0.08C0 -0.52 0.48 -1 1.08 -1H4.08C4.68 -1 5.16 -0.52 5.16 0.08C5.16 1.08 5.32 2.04 5.64 2.92C5.8 3.36 5.72 3.88 5.4 4.24L3.64 6C5.08 9.16 7.84 11.92 11 13.36L12.76 11.6C13.12 11.28 13.64 11.2 14.08 11.36C14.96 11.68 15.92 11.84 16.92 11.84C17.52 11.84 18 12.32 18 12.92V15.92C18 16.52 17.52 17 16.92 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ user.telephone }}</span>
+          </div>
+          <div class="detail-item" *ngIf="user.equipe">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ user.equipe }}</span>
+          </div>
+          <div class="detail-item">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Entré le {{ formatDate(user.dateEntree) }}</span>
+          </div>
+        </div>
+
+        <div class="user-competences" *ngIf="user.competences && user.competences.length > 0">
+          <span class="competence-tag" *ngFor="let comp of user.competences.slice(0, 3)">
+            {{ comp }}
+          </span>
+          <span class="competence-more" *ngIf="user.competences.length > 3">
+            +{{ user.competences.length - 3 }}
+          </span>
+        </div>
+      </div>
+
+      <div class="user-card-actions">
+        <button class="btn-action btn-edit" (click)="openEditModal(user)">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          Modifier
+        </button>
+        <button class="btn-action btn-toggle" (click)="toggleUserStatus(user)">
+          <svg *ngIf="user.statut === 'actif'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg *ngIf="user.statut !== 'actif'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {{ user.statut === 'actif' ? 'Désactiver' : 'Activer' }}
+        </button>
+        <button class="btn-action btn-delete" (click)="openDeleteModal(user)">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si aucun utilisateur -->
+  <div class="empty-state" *ngIf="usersFiltres.length === 0">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+    </svg>
+    <h3>Aucun utilisateur trouvé</h3>
+    <p *ngIf="recherche || filtreRole !== 'tous' || filtreStatut !== 'tous' || filtreEquipe !== 'toutes'">
+      Aucun utilisateur ne correspond à vos critères de recherche.
+    </p>
+    <p *ngIf="!recherche && filtreRole === 'tous' && filtreStatut === 'tous' && filtreEquipe === 'toutes'">
+      Aucun utilisateur n'a été enregistré pour le moment.
+    </p>
+  </div>
+
+  <!-- Modal création/édition utilisateur -->
+  <div class="modal-overlay" *ngIf="showUserModal" (click)="closeUserModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}</h2>
+        <button class="modal-close" (click)="closeUserModal()">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form (ngSubmit)="saveUser()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="newUser.nom" name="nom" required placeholder="Nom">
+            </div>
+            <div class="form-group">
+              <label>Prénom <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="newUser.prenom" name="prenom" required placeholder="Prénom">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email <span class="required">*</span></label>
+              <input type="email" [(ngModel)]="newUser.email" name="email" required placeholder="email@mucrefci.ngser.com">
+            </div>
+            <div class="form-group">
+              <label>Téléphone</label>
+              <input type="tel" [(ngModel)]="newUser.telephone" name="telephone" placeholder="+225 07 12 34 56 78">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Rôle <span class="required">*</span></label>
+              <select [(ngModel)]="newUser.role" name="role" required>
+                <option value="agent">Agent</option>
+                <option value="agent_senior">Agent Senior</option>
+                <option value="superviseur">Superviseur</option>
+                <option value="admin">Administrateur</option>
+                <option value="stagiaire">Stagiaire</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Statut <span class="required">*</span></label>
+              <select [(ngModel)]="newUser.statut" name="statut" required>
+                <option value="actif">Actif</option>
+                <option value="en_pause">En pause</option>
+                <option value="hors_ligne">Hors ligne</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Équipe</label>
+            <input type="text" [(ngModel)]="newUser.equipe" name="equipe" placeholder="Service Client">
+          </div>
+
+          <div class="form-group">
+            <label>Compétences</label>
+            <div class="tags-container">
+              <span class="tag" *ngFor="let comp of newUser.competences">
+                {{ comp }}
+                <button type="button" class="tag-remove" (click)="removeCompetence(comp)">×</button>
+              </span>
+              <button type="button" class="btn-add-tag" (click)="addCompetence()">+ Ajouter</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Spécialités</label>
+            <div class="tags-container">
+              <span class="tag" *ngFor="let spec of newUser.specialites">
+                {{ spec }}
+                <button type="button" class="tag-remove" (click)="removeSpecialite(spec)">×</button>
+              </span>
+              <button type="button" class="btn-add-tag" (click)="addSpecialite()">+ Ajouter</button>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="closeUserModal()" [disabled]="isSaving">
+              Annuler
+            </button>
+            <button type="submit" class="btn-submit" [disabled]="isSaving">
+              <span *ngIf="!isSaving">{{ isEditing ? 'Modifier' : 'Créer' }}</span>
+              <span *ngIf="isSaving">Enregistrement...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal suppression -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+    <div class="modal-content modal-small" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Confirmer la suppression</h2>
+        <button class="modal-close" (click)="closeDeleteModal()">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p>Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ userToDelete ? getUserDisplayName(userToDelete) : '' }}</strong> ?</p>
+        <p class="warning-text">Cette action est irréversible.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeDeleteModal()">
+          Annuler
+        </button>
+        <button type="button" class="btn-delete" (click)="deleteUser()">
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

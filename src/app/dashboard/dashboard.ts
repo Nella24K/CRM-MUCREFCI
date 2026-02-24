@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartType } from 'chart.js';
+import { ChartConfiguration, ChartType, Chart, registerables } from 'chart.js';
 import { TicketService } from '../services/ticket';
 import { DashboardStats, ChartData } from '../models/ticket';
 import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+
+// Enregistrer les composants Chart.js
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-dashboard',
@@ -14,7 +18,10 @@ import * as XLSX from 'xlsx';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, OnDestroy {
+  // Exposer Math dans le template pour les calculs (ex: arrondir la satisfaction)
+  readonly Math = Math;
+
   // Statistiques
   stats: DashboardStats = {
     ticketsOuverts: 0,
@@ -49,6 +56,8 @@ export class Dashboard implements OnInit {
 
   // Recherche
   searchQuery: string = '';
+  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   // Graphique
   chartType: 'jour' | 'semaine' | 'mois' = 'jour';
@@ -158,13 +167,31 @@ export class Dashboard implements OnInit {
 
   constructor(
     private ticketService: TicketService,
-    private toastr: ToastrService
-  ) {}
+    private toastr: ToastrService,
+    private cdr: ChangeDetectorRef
+  ) {
+    // Debounce pour la recherche
+    this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe(query => {
+      this.searchQuery = query;
+      this.onSearch();
+    });
+  }
 
   ngOnInit(): void {
+    // Charger les données en parallèle pour de meilleures performances
     this.loadDashboardData();
-    this.loadChartData();
+    // Charger le graphique avec un léger délai pour améliorer le temps de chargement perçu
+    setTimeout(() => this.loadChartData(), 100);
     this.loadAlerts();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadDashboardData(): void {
@@ -223,8 +250,11 @@ export class Dashboard implements OnInit {
             tension: 0.4
           }))
         };
+        // Forcer la détection de changement pour mettre à jour le graphique
+        this.cdr.detectChanges();
       },
       error: (error) => {
+        console.error('Erreur lors du chargement des données du graphique:', error);
         // Afficher une alerte d'erreur pour les graphiques
         this.alerts.unshift({
           id: Date.now(),
@@ -247,35 +277,56 @@ export class Dashboard implements OnInit {
   }
 
   loadAlerts(): void {
-    // Simuler des alertes
-    this.alerts = [
-      {
-        id: 1,
+    // Générer des alertes dynamiques basées sur les stats
+    const newAlerts: typeof this.alerts = [];
+    
+    if (this.stats.ticketsEnRetardSLA > 0) {
+      newAlerts.push({
+        id: Date.now() + 1,
         type: 'warning',
-        message: `${this.stats.ticketsEnRetardSLA} ticket(s) en retard SLA`,
-        timestamp: new Date()
-      },
-      {
-        id: 2,
-        type: 'info',
-        message: `${this.stats.nouveauxTickets} nouveau(x) ticket(s) aujourd'hui`,
-        timestamp: new Date()
-      }
-    ];
-  }
-
-  onFilterChange(): void {
-    try {
-      this.loadDashboardData();
-      this.loadChartData();
-    } catch (error: any) {
-      this.alerts.unshift({
-        id: Date.now(),
-        type: 'error',
-        message: 'Erreur lors de l\'application des filtres. Veuillez réessayer.',
+        message: `${this.stats.ticketsEnRetardSLA} ticket(s) en retard SLA - Action requise`,
         timestamp: new Date()
       });
     }
+    
+    if (this.stats.nouveauxTickets > 0) {
+      newAlerts.push({
+        id: Date.now() + 2,
+        type: 'info',
+        message: `${this.stats.nouveauxTickets} nouveau(x) ticket(s) aujourd'hui`,
+        timestamp: new Date()
+      });
+    }
+
+    if (this.stats.tauxResolution < 70) {
+      newAlerts.push({
+        id: Date.now() + 3,
+        type: 'warning',
+        message: `Taux de résolution faible (${this.stats.tauxResolution}%) - Amélioration nécessaire`,
+        timestamp: new Date()
+      });
+    }
+
+    // Garder seulement les 5 dernières alertes
+    this.alerts = [...newAlerts, ...this.alerts].slice(0, 5);
+  }
+
+  onFilterChange(): void {
+    // Debounce pour éviter trop d'appels API
+    clearTimeout((this as any).filterTimeout);
+    (this as any).filterTimeout = setTimeout(() => {
+      try {
+        this.loadDashboardData();
+        this.loadChartData();
+      } catch (error: any) {
+        this.alerts.unshift({
+          id: Date.now(),
+          type: 'error',
+          message: 'Erreur lors de l\'application des filtres. Veuillez réessayer.',
+          timestamp: new Date()
+        });
+      }
+    }, 300);
   }
 
   onChartTypeChange(): void {
@@ -293,6 +344,10 @@ export class Dashboard implements OnInit {
       case 'semaine': return 'Hebdomadaire';
       case 'mois': return 'Mensuel';
     }
+  }
+
+  onSearchInput(value: string): void {
+    this.searchSubject.next(value);
   }
 
   onSearch(): void {
@@ -400,12 +455,26 @@ export class Dashboard implements OnInit {
   }
 
   formatTemps(minutes: number): string {
+    if (!minutes || minutes === 0) return '0 min';
     if (minutes < 60) {
-      return `${minutes} min`;
+      return `${Math.round(minutes)} min`;
     }
     const heures = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+    const mins = Math.round(minutes % 60);
+    if (heures >= 24) {
+      const jours = Math.floor(heures / 24);
+      const heuresRestantes = heures % 24;
+      return jours > 0 ? `${jours}j ${heuresRestantes > 0 ? heuresRestantes + 'h' : ''}`.trim() : `${heuresRestantes}h`;
+    }
     return mins > 0 ? `${heures}h ${mins}min` : `${heures}h`;
+  }
+
+  getTempsMoyenTraitement(): string {
+    return this.formatTemps(this.stats.tempsMoyenTraitement);
+  }
+
+  getTempsMoyenReponse(): string {
+    return this.formatTemps(this.stats.tempsMoyenReponse);
   }
 
   formatPourcentage(value: number): string {

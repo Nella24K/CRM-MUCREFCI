@@ -729,6 +729,33 @@
   }
 }
 
+.stat-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.5rem;
+  font-weight: 500;
+  display: block;
+}
+
+.stat-rating {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.stat-rating .star {
+  font-size: 1.25rem;
+  color: #e2e8f0;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.stat-rating .star.active {
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+}
+
 /* Loading */
 .loading-container {
   display: flex;
@@ -1074,6 +1101,14 @@
 
   .stat-value {
     font-size: 2rem;
+  }
+
+  .stat-subtitle {
+    font-size: 0.8125rem;
+  }
+
+  .stat-rating .star {
+    font-size: 1rem;
   }
 
   .filters-container {

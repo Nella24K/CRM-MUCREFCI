@@ -1,2 +1,372 @@
-<div class="supervision">
+<div class="supervision-page">
+  <!-- En-tête -->
+  <div class="supervision-header">
+    <div class="header-title">
+      <h1>SUPERVISION</h1>
+      <p class="subtitle">Gestion de l'équipe et suivi en temps réel</p>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des données...</p>
+  </div>
+
+  <!-- Contenu principal -->
+  <div *ngIf="!isLoading && teamStats">
+    <!-- Widget État de l'équipe -->
+    <div class="team-status-widget">
+      <div class="widget-header">
+        <h2>État de l'équipe</h2>
+        <div class="status-indicator" [ngClass]="'status-' + teamStats.statutGlobal">
+          <span class="status-dot"></span>
+          <span>{{ teamStats.statutGlobal === 'operationnel' ? 'Opérationnel' : teamStats.statutGlobal === 'surcharge' ? 'Surcharge' : 'Critique' }}</span>
+        </div>
+      </div>
+      <div class="team-stats-grid">
+        <div class="team-stat-card">
+          <div class="stat-icon agents-actifs">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2"/>
+              <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ teamStats.agentsActifs }}</div>
+            <div class="stat-label">Agents actifs</div>
+            <div class="stat-total">sur {{ teamStats.totalAgents }}</div>
+          </div>
+        </div>
+
+        <div class="team-stat-card">
+          <div class="stat-icon agents-pause">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <line x1="10" y1="8" x2="10" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="14" y1="8" x2="14" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ teamStats.agentsEnPause }}</div>
+            <div class="stat-label">En pause</div>
+          </div>
+        </div>
+
+        <div class="team-stat-card">
+          <div class="stat-icon agents-offline">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ teamStats.agentsHorsLigne }}</div>
+            <div class="stat-label">Hors ligne</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widget Charge équipe -->
+    <div class="workload-widget">
+      <div class="widget-header">
+        <h2>Charge de l'équipe</h2>
+      </div>
+      <div class="workload-stats">
+        <div class="workload-item">
+          <span class="workload-label">Tickets assignés</span>
+          <span class="workload-value">{{ teamStats.ticketsAssignes }}</span>
+        </div>
+        <div class="workload-item">
+          <span class="workload-label">En cours</span>
+          <span class="workload-value">{{ teamStats.ticketsEnCours }}</span>
+        </div>
+        <div class="workload-item">
+          <span class="workload-label">En attente client</span>
+          <span class="workload-value">{{ teamStats.ticketsEnAttenteClient }}</span>
+        </div>
+        <div class="workload-item workload-item-warning">
+          <span class="workload-label">En retard</span>
+          <span class="workload-value">{{ teamStats.ticketsEnRetard }}</span>
+          <span class="workload-percentage">({{ Math.round((teamStats.ticketsEnRetard / teamStats.ticketsAssignes) * 100) }}%)</span>
+        </div>
+        <div class="workload-item workload-item-success">
+          <span class="workload-label">Capacité restante</span>
+          <span class="workload-value">{{ teamStats.capaciteRestante }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alertes -->
+    <div class="alertes-section" *ngIf="alertes.length > 0">
+      <div class="section-header">
+        <h2>Alertes nécessitant action</h2>
+        <span class="alertes-count">{{ alertes.length }}</span>
+      </div>
+      <div class="alertes-list">
+        <div *ngFor="let alerte of alertes" class="alerte-card" [ngClass]="getAlertePriorityClass(alerte.priorite)">
+          <div class="alerte-content">
+            <div class="alerte-header">
+              <span class="alerte-type">{{ getAlerteTypeLabel(alerte.type) }}</span>
+              <span class="alerte-priority" [ngClass]="'priority-' + alerte.priorite">
+                {{ alerte.priorite === 'haute' ? 'Haute' : alerte.priorite === 'moyenne' ? 'Moyenne' : 'Basse' }}
+              </span>
+            </div>
+            <h3 class="alerte-titre">{{ alerte.titre }}</h3>
+            <p class="alerte-message">{{ alerte.message }}</p>
+            <div class="alerte-date">{{ alerte.date | date:'dd/MM/yyyy HH:mm' }}</div>
+          </div>
+          <div class="alerte-actions">
+            <button 
+              *ngFor="let action of alerte.actions" 
+              class="btn-action"
+              [ngClass]="'btn-' + action.action"
+              (click)="handleAlerteAction(alerte, action.action)">
+              {{ action.label }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpis-section">
+      <div class="section-header">
+        <h2>Indicateurs de performance</h2>
+      </div>
+      <div class="kpis-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Temps moyen réponse</div>
+          <div class="kpi-value">1h25</div>
+          <div class="kpi-target">Objectif < 4h ✅</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">SLA respecté</div>
+          <div class="kpi-value">89%</div>
+          <div class="kpi-target">Objectif > 85% ✅</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Satisfaction</div>
+          <div class="kpi-value">4.3/5</div>
+          <div class="kpi-target">Objectif > 4.0 ✅</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Taux résolution 1er niveau</div>
+          <div class="kpi-value">72%</div>
+          <div class="kpi-target">Objectif > 70% ✅</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtres agents -->
+    <div class="filters-section">
+      <div class="filters-header">
+        <h2>Gestion des agents</h2>
+      </div>
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>Statut</label>
+          <select [(ngModel)]="filtreStatut" (change)="onFiltreChange()">
+            <option value="tous">Tous les statuts</option>
+            <option value="actif">Actif</option>
+            <option value="en_pause">En pause</option>
+            <option value="hors_ligne">Hors ligne</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Équipe</label>
+          <select [(ngModel)]="filtreEquipe" (change)="onFiltreChange()">
+            <option value="toutes">Toutes les équipes</option>
+            <option value="Service Client">Service Client</option>
+            <option value="Administration">Administration</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des agents -->
+    <div class="agents-section">
+      <div class="section-header">
+        <h2>Agents de l'équipe</h2>
+        <span class="agents-count">{{ agentsFiltres.length }} agent(s)</span>
+      </div>
+      <div class="agents-grid">
+        <div *ngFor="let agent of agentsFiltres" class="agent-card" (click)="viewAgentDetail(agent.id)">
+          <div class="agent-card-header">
+            <div class="agent-avatar">
+              <span>{{ agent.prenom.charAt(0) }}{{ agent.nom.charAt(0) }}</span>
+            </div>
+            <div class="agent-info">
+              <h3 class="agent-name">{{ getUserDisplayName(agent) }}</h3>
+              <p class="agent-email">{{ agent.email }}</p>
+            </div>
+            <div class="agent-badges">
+              <span class="role-badge" [ngClass]="'role-' + agent.role">
+                {{ getRoleLabel(agent.role) }}
+              </span>
+              <span class="statut-badge" [ngClass]="getStatutClass(agent.statut)">
+                {{ getStatutLabel(agent.statut) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="agent-card-body" *ngIf="agent.performance">
+            <div class="performance-stats">
+              <div class="perf-item">
+                <span class="perf-label">Tickets en cours</span>
+                <span class="perf-value">{{ agent.performance.ticketsEnCours }}</span>
+              </div>
+              <div class="perf-item">
+                <span class="perf-label">Traités</span>
+                <span class="perf-value">{{ agent.performance.ticketsTraites }}</span>
+              </div>
+              <div class="perf-item">
+                <span class="perf-label">Temps moyen</span>
+                <span class="perf-value">{{ formatTemps(agent.performance.tempsMoyenReponse) }}</span>
+              </div>
+              <div class="perf-item">
+                <span class="perf-label">Satisfaction</span>
+                <span class="perf-value">{{ agent.performance.satisfactionMoyenne.toFixed(1) }}/5</span>
+              </div>
+            </div>
+            <div class="performance-score">
+              <div class="score-label">Score global</div>
+              <div class="score-value">{{ agent.performance.score }}/100</div>
+              <div class="score-bar">
+                <div class="score-fill" [style.width.%]="agent.performance.score"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal réattribution -->
+  <div class="modal-overlay" *ngIf="showReassignModal" (click)="closeReassignModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Réattribuer le ticket</h2>
+        <button class="modal-close" (click)="closeReassignModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="ticketToReassign" class="ticket-info">
+          <p><strong>Ticket:</strong> {{ ticketToReassign.reference }}</p>
+          <p><strong>Client:</strong> {{ ticketToReassign.clientNom }}</p>
+          <p><strong>Catégorie:</strong> {{ ticketToReassign.categorie }}</p>
+        </div>
+
+        <div class="form-group">
+          <label>Nouvel agent <span class="required">*</span></label>
+          <select [(ngModel)]="selectedAgentId" class="form-select">
+            <option value="">Sélectionner un agent</option>
+            <option *ngFor="let agent of availableAgents" [value]="agent.id">
+              {{ agent.prenom }} {{ agent.nom }} 
+              <span *ngIf="agent.equipe">({{ agent.equipe }})</span>
+              <span *ngIf="agent.competences && agent.competences.length > 0">
+                - {{ agent.competences.join(', ') }}
+              </span>
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Commentaire (optionnel)</label>
+          <textarea 
+            [(ngModel)]="reassignComment" 
+            class="form-textarea"
+            rows="3"
+            placeholder="Raison de la réattribution..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeReassignModal()" [disabled]="isReassigning">
+          Annuler
+        </button>
+        <button class="btn-submit" (click)="confirmReassign()" [disabled]="isReassigning || !selectedAgentId">
+          <span *ngIf="!isReassigning">Réattribuer</span>
+          <span *ngIf="isReassigning">Réattribution...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal détail agent -->
+  <div class="modal-overlay" *ngIf="showAgentDetail && selectedAgent" (click)="closeAgentDetail()">
+    <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Détails agent - {{ getUserDisplayName(selectedAgent) }}</h2>
+        <button class="modal-close" (click)="closeAgentDetail()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="agent-detail-content">
+          <div class="detail-section">
+            <h3>Informations</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="detail-label">Email:</span>
+                <span class="detail-value">{{ selectedAgent.email }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Rôle:</span>
+                <span class="detail-value">{{ getRoleLabel(selectedAgent.role) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Statut:</span>
+                <span class="detail-value">{{ getStatutLabel(selectedAgent.statut) }}</span>
+              </div>
+              <div class="detail-item" *ngIf="selectedAgent.equipe">
+                <span class="detail-label">Équipe:</span>
+                <span class="detail-value">{{ selectedAgent.equipe }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section" *ngIf="selectedAgent.performance">
+            <h3>Performance</h3>
+            <div class="performance-details">
+              <div class="perf-detail-item">
+                <span class="perf-detail-label">Tickets traités:</span>
+                <span class="perf-detail-value">{{ selectedAgent.performance.ticketsTraites }}</span>
+              </div>
+              <div class="perf-detail-item">
+                <span class="perf-detail-label">Tickets en cours:</span>
+                <span class="perf-detail-value">{{ selectedAgent.performance.ticketsEnCours }}</span>
+              </div>
+              <div class="perf-detail-item">
+                <span class="perf-detail-label">Temps moyen réponse:</span>
+                <span class="perf-detail-value">{{ formatTemps(selectedAgent.performance.tempsMoyenReponse) }}</span>
+              </div>
+              <div class="perf-detail-item">
+                <span class="perf-detail-label">Satisfaction moyenne:</span>
+                <span class="perf-detail-value">{{ selectedAgent.performance.satisfactionMoyenne.toFixed(1) }}/5</span>
+              </div>
+              <div class="perf-detail-item">
+                <span class="perf-detail-label">Taux résolution:</span>
+                <span class="perf-detail-value">{{ selectedAgent.performance.tauxResolution }}%</span>
+              </div>
+              <div class="perf-detail-item">
+                <span class="perf-detail-label">SLA respecté:</span>
+                <span class="perf-detail-value">{{ selectedAgent.performance.slaRespecte }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section" *ngIf="selectedAgent.competences && selectedAgent.competences.length > 0">
+            <h3>Compétences</h3>
+            <div class="competences-list">
+              <span class="competence-tag" *ngFor="let comp of selectedAgent.competences">
+                {{ comp }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeAgentDetail()">Fermer</button>
+      </div>
+    </div>
+  </div>
 </div>

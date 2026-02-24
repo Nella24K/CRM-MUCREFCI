@@ -9,13 +9,13 @@
     </div>
     
     <div class="header-actions">
-      <!-- Barre de recherche -->
       <div class="search-container">
         <input
           type="text"
           class="search-input"
-          placeholder="Rechercher..."
-          [(ngModel)]="searchQuery"
+          placeholder="Rechercher tickets, clients..."
+          [ngModel]="searchQuery"
+          (ngModelChange)="onSearchInput($event)"
           (keyup.enter)="onSearch()"
         />
         <button class="search-button" (click)="onSearch()">
@@ -142,6 +142,7 @@
       <div class="stat-content">
         <h3 class="stat-label">Tickets ouverts</h3>
         <p class="stat-value">{{ stats.ticketsOuverts }}</p>
+        <span class="stat-subtitle">Total en cours</span>
       </div>
     </div>
 
@@ -156,6 +157,7 @@
       <div class="stat-content">
         <h3 class="stat-label">Tickets en cours</h3>
         <p class="stat-value">{{ stats.ticketsEnCours }}</p>
+        <span class="stat-subtitle">En traitement actif</span>
       </div>
     </div>
 
@@ -170,6 +172,7 @@
       <div class="stat-content">
         <h3 class="stat-label">Tickets clôturés</h3>
         <p class="stat-value">{{ stats.ticketsClotures }}</p>
+        <span class="stat-subtitle">{{ formatPourcentage(stats.tauxResolution) }} résolus</span>
       </div>
     </div>
 
@@ -183,7 +186,7 @@
       </div>
       <div class="stat-content">
         <h3 class="stat-label">Temps moyen de traitement</h3>
-        <p class="stat-value">48h</p>
+        <p class="stat-value">{{ getTempsMoyenTraitement() }}</p>
       </div>
     </div>
 
@@ -196,7 +199,10 @@
       </div>
       <div class="stat-content">
         <h3 class="stat-label">Satisfaction client</h3>
-        <p class="stat-value">{{ stats.satisfactionClient }}/5</p>
+        <p class="stat-value">{{ stats.satisfactionClient.toFixed(1) }}/5</p>
+        <div class="stat-rating">
+          <span *ngFor="let i of [1,2,3,4,5]" class="star" [class.active]="i <= Math.round(stats.satisfactionClient)">★</span>
+        </div>
       </div>
     </div>
 

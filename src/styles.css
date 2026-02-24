@@ -1,8 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Import Google Fonts - Inter (meilleure lisibilité) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
+/* Police système (Inter est en fallback si déjà disponible sur la machine) */
 @import "tailwindcss";
 
 /* Toastr styles */

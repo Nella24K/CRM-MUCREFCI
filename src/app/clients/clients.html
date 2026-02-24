@@ -5,14 +5,23 @@
       <h1>CLIENTS</h1>
       <p class="subtitle">Gestion de la base clients</p>
     </div>
-    <div class="header-stats">
-      <div class="stat-card">
-        <div class="stat-value">{{ clients.length }}</div>
-        <div class="stat-label">Total</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ clientsFiltres.length }}</div>
-        <div class="stat-label">Filtrés</div>
+    <div class="header-actions">
+      <button class="btn-create-client" (click)="openCreateModal()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Nouveau client
+      </button>
+      <div class="header-stats">
+        <div class="stat-card">
+          <div class="stat-value">{{ clients.length }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ clientsFiltres.length }}</div>
+          <div class="stat-label">Filtrés</div>
+        </div>
       </div>
     </div>
   </div>
@@ -154,5 +163,100 @@
     <p *ngIf="!recherche && filtreStatut === 'tous' && filtreCreeParEmail === null && filtreNouveauContact === null">
       Aucun client n'a été enregistré pour le moment.
     </p>
+  </div>
+
+  <!-- Modal de création de client -->
+  <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Nouveau client</h2>
+        <button class="modal-close" (click)="closeCreateModal()">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form (ngSubmit)="createClient()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nom <span class="required">*</span></label>
+              <input type="text" [(ngModel)]="newClient.nom" name="nom" required placeholder="Nom du client">
+            </div>
+            <div class="form-group">
+              <label>Prénom</label>
+              <input type="text" [(ngModel)]="newClient.prenom" name="prenom" placeholder="Prénom">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email <span class="required">*</span></label>
+              <input type="email" [(ngModel)]="newClient.email" name="email" required placeholder="email@exemple.com">
+            </div>
+            <div class="form-group">
+              <label>Téléphone</label>
+              <input type="tel" [(ngModel)]="newClient.telephone" name="telephone" placeholder="+225 07 12 34 56 78">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Entreprise</label>
+            <input type="text" [(ngModel)]="newClient.entreprise" name="entreprise" placeholder="Nom de l'entreprise">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ville</label>
+              <input type="text" [(ngModel)]="newClient.ville" name="ville" placeholder="Ville">
+            </div>
+            <div class="form-group">
+              <label>Code postal</label>
+              <input type="text" [(ngModel)]="newClient.codePostal" name="codePostal" placeholder="Code postal">
+            </div>
+            <div class="form-group">
+              <label>Pays</label>
+              <input type="text" [(ngModel)]="newClient.pays" name="pays" placeholder="Pays">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Adresse</label>
+            <input type="text" [(ngModel)]="newClient.adresse" name="adresse" placeholder="Adresse complète">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Secteur</label>
+              <input type="text" [(ngModel)]="newClient.secteur" name="secteur" placeholder="Secteur d'activité">
+            </div>
+            <div class="form-group">
+              <label>Statut</label>
+              <select [(ngModel)]="newClient.statut" name="statut">
+                <option value="prospect">Prospect</option>
+                <option value="actif">Actif</option>
+                <option value="inactif">Inactif</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Notes</label>
+            <textarea [(ngModel)]="newClient.notes" name="notes" rows="3" placeholder="Notes internes sur le client"></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="closeCreateModal()" [disabled]="isCreating">
+              Annuler
+            </button>
+            <button type="submit" class="btn-submit" [disabled]="isCreating">
+              <span *ngIf="!isCreating">Créer le client</span>
+              <span *ngIf="isCreating">Création en cours...</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
