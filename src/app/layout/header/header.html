@@ -1,6 +1,5 @@
-<header class="header">
+<header class="header" [class.sidebar-collapsed]="sidebarCollapsed">
   <div class="header-left">
-    <img src="/images/ngser-logo.png" alt="NGSER Logo" class="header-logo" />
     <button class="menu-toggle" (click)="onToggleSidebar()" aria-label="Toggle menu">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M3 12H21M3 6H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -12,12 +11,12 @@
     <!-- Icône de notifications avec badge numérique -->
     <div class="notification-container">
       <button class="notification-button" (click)="toggleNotifications($event)" aria-label="Notifications">
-        <!-- Icône clochette -->
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M6 8C6 4.68629 8.68629 2 12 2C15.3137 2 18 4.68629 18 8V11.5858C18 12.1162 18.2107 12.625 18.5858 13L20 14.4142C20.781 15.1953 20.781 16.4616 20 17.2426C19.219 18.0237 17.9527 18.0237 17.1716 17.2426L15.7574 15.8284C15.3824 15.4534 15.1162 15 15 14.5858V8C15 6.34315 13.6569 5 12 5C10.3431 5 9 6.34315 9 8V14.5858C8.88382 15 8.61763 15.4534 8.24264 15.8284L6.82843 17.2426C6.04737 18.0237 4.78105 18.0237 4 17.2426C3.21895 16.4616 3.21895 15.1953 4 14.4142L5.41421 13C5.78929 12.625 6 12.1162 6 11.5858V8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Icône cloche (style standard) -->
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6.002 6.002 0 0 0-4-5.659V5a2 2 0 1 0-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 17v1a3 3 0 0 0 6 0v-1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+        <span class="notification-plusone" *ngIf="showPlusOne">+1</span>
       </button>
       
       <!-- Dropdown notifications -->
@@ -61,7 +60,7 @@
           </svg>
         </div>
         <div class="user-info">
-          <div class="user-name">John Doe</div>
+          <div class="user-name">{{ currentUserName }}</div>
         </div>
       </button>
 
@@ -75,7 +74,7 @@
           <span>Mon profil</span>
         </a>
         <div class="menu-divider"></div>
-        <button class="menu-item logout" (click)="onLogout()">
+        <button type="button" class="menu-item logout" (click)="openLogoutDialog($event)">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -83,6 +82,28 @@
           </svg>
           <span>Déconnexion</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    *ngIf="showLogoutDialog"
+    class="logout-dialog-backdrop"
+    (click)="cancelLogoutDialog()"
+    role="presentation"
+  >
+    <div
+      class="logout-dialog"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="logout-dialog-title"
+    >
+      <h2 id="logout-dialog-title" class="logout-dialog-title">Déconnexion</h2>
+      <p class="logout-dialog-text">Êtes-vous sûr de vouloir vous déconnecter ?</p>
+      <div class="logout-dialog-actions">
+        <button type="button" class="logout-dialog-btn cancel" (click)="cancelLogoutDialog()">Annuler</button>
+        <button type="button" class="logout-dialog-btn confirm" (click)="confirmLogout()">Se déconnecter</button>
       </div>
     </div>
   </div>

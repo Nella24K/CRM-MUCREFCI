@@ -22,7 +22,7 @@
 
 .content-area {
   flex: 1;
-  padding: 2rem;
+  padding: calc(2rem + 80px) 2rem 2rem;
   overflow-y: auto;
   background: var(--background);
 }
@@ -57,7 +57,7 @@
   }
 
   .content-area {
-    padding: 1.5rem;
+    padding: calc(1.5rem + 80px) 1.5rem 1.5rem;
   }
 
   .sidebar-overlay.active {
@@ -68,19 +68,19 @@
 /* Responsive - Mobile */
 @media (max-width: 768px) {
   .content-area {
-    padding: 1.25rem;
+    padding: calc(1.25rem + 80px) 1.25rem 1.25rem;
   }
 }
 
 @media (max-width: 640px) {
   .content-area {
-    padding: 1rem;
+    padding: calc(1rem + 80px) 1rem 1rem;
   }
 }
 
 /* Responsive - Très petit mobile */
 @media (max-width: 480px) {
   .content-area {
-    padding: 0.75rem;
+    padding: calc(0.75rem + 80px) 0.75rem 0.75rem;
   }
 }

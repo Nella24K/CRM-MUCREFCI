@@ -1,0 +1,20 @@
+<div class="param-page">
+  <div class="header">
+    <h1>Paramétrages</h1>
+    <p>Sélectionnez un élément pour accéder à sa gestion.</p>
+  </div>
+
+  <div class="grid">
+    <a
+      class="card"
+      *ngFor="let card of settingsCards"
+      [routerLink]="card.route"
+      role="button"
+      [attr.aria-label]="'Ouvrir ' + card.title"
+    >
+      <h2>{{ card.title }}</h2>
+      <p class="muted">{{ card.description }}</p>
+      <span class="link-label">Ouvrir</span>
+    </a>
+  </div>
+</div>

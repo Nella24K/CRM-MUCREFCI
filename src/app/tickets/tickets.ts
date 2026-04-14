@@ -152,4 +152,8 @@ export class Tickets implements OnInit {
     };
     return labels[priorite] || priorite;
   }
+
+  trackByTicketId(index: number, ticket: Ticket): string {
+    return ticket.id || `ticket-${index}`;
+  }
 }

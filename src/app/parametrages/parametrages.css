@@ -1,0 +1,9 @@
+.param-page { padding: 2rem; }
+.header h1 { margin: 0; }
+.header p { margin: .4rem 0 1.5rem; color: #64748b; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; text-decoration: none; transition: .2s ease; }
+.card:hover { border-color: #2563eb; transform: translateY(-2px); box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12); }
+.card h2 { margin: 0 0 .3rem; color: #0f172a; }
+.muted { color: #64748b; margin: 0 0 .8rem; }
+.link-label { color: #2563eb; font-weight: 600; font-size: .9rem; }

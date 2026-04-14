@@ -1,0 +1,31 @@
+<div class="settings-page">
+  <div class="page-header">
+    <h1>Tags</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-back" (click)="goToParametrages()">Retour</button>
+      <button type="button" class="btn-create">Créer un tag</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Couleur</th>
+          <th>Tickets associés</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tag of tags">
+          <td>{{ tag.nom }}</td>
+          <td>
+            <span class="tag-color" [style.background]="tag.couleur"></span>
+            {{ tag.couleur }}
+          </td>
+          <td>{{ tag.tickets }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

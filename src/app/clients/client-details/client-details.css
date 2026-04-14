@@ -1,0 +1,8 @@
+.page { padding: 1.5rem; }
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+.loader { padding: 1rem; }
+.card { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: .8rem; }
+.card div { border:1px solid #e2e8f0; border-radius: 8px; padding: .6rem; background:#fff; }
+.card span { display:block; color:#64748b; font-size:.75rem; }
+.card strong { color:#0f172a; }
+.full { grid-column: 1 / -1; }

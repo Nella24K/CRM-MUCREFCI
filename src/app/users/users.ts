@@ -2,9 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgZone } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { UserService } from '../services/user';
 import { User } from '../models/user';
 import { ToastrService } from 'ngx-toastr';
+import { ParametrageService } from '../services/parametrage';
+import { ApiError } from '../services/api';
+import { Subscription, catchError, finalize, of, switchMap, throwError, timeout, timer } from 'rxjs';
 
 @Component({
   selector: 'app-users',
@@ -15,21 +20,21 @@ import { ToastrService } from 'ngx-toastr';
 export class Users implements OnInit {
   users: User[] = [];
   usersFiltres: User[] = [];
+  usersAffiches: User[] = [];
+  pageSize = 5;
+  currentPage = 1;
   
   // Filtres
   recherche: string = '';
   filtreRole: string = 'tous';
   filtreStatut: string = 'tous';
-  filtreEquipe: string = 'toutes';
 
   // Options de filtres
   roles = [
     { value: 'tous', label: 'Tous les rôles' },
     { value: 'admin', label: 'Administrateur' },
     { value: 'superviseur', label: 'Superviseur' },
-    { value: 'agent_senior', label: 'Agent Senior' },
-    { value: 'agent', label: 'Agent' },
-    { value: 'stagiaire', label: 'Stagiaire' }
+    { value: 'agent', label: 'Agent' }
   ];
 
   statuts = [
@@ -39,17 +44,21 @@ export class Users implements OnInit {
     { value: 'hors_ligne', label: 'Hors ligne' }
   ];
 
-  equipes = [
-    { value: 'toutes', label: 'Toutes les équipes' },
-    { value: 'Service Client', label: 'Service Client' },
-    { value: 'Administration', label: 'Administration' }
-  ];
-
   // Modal création/édition
   showUserModal: boolean = false;
   isEditing: boolean = false;
   isSaving: boolean = false;
+  private saveFailSafeId: ReturnType<typeof setTimeout> | null = null;
+  private createRecoverySubscription: Subscription | null = null;
+  isLoadingRoles = false;
+  roleLoadError = '';
   currentUser: User | null = null;
+  private readonly defaultRoleOptions: Array<{ value: User['role']; label: string }> = [
+    { value: 'agent', label: 'Agent' },
+    { value: 'superviseur', label: 'Superviseur' },
+    { value: 'admin', label: 'Administrateur' },
+  ];
+  roleOptionsForForm: Array<{ value: User['role']; label: string }> = [...this.defaultRoleOptions];
   newUser = {
     nom: '',
     prenom: '',
@@ -69,22 +78,119 @@ export class Users implements OnInit {
 
   constructor(
     private userService: UserService,
+    private parametrageService: ParametrageService,
     private router: Router,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadUsers();
+    this.loadRolesForUserForm();
+  }
+
+  private loadRolesForUserForm(): void {
+    this.isLoadingRoles = true;
+    this.roleLoadError = '';
+
+    this.parametrageService.getRoles().subscribe({
+      next: (response) => {
+        const apiRoles = this.extractRoleOptions(response);
+        this.roleOptionsForForm = this.mergeRoleOptionsWithDefaults(apiRoles);
+        this.isLoadingRoles = false;
+      },
+      error: () => {
+        this.roleLoadError = 'Impossible de charger la liste des rôles.';
+        this.roleOptionsForForm = [...this.defaultRoleOptions];
+        this.isLoadingRoles = false;
+      },
+    });
+  }
+
+  private mergeRoleOptionsWithDefaults(
+    apiRoles: Array<{ value: User['role']; label: string }>
+  ): Array<{ value: User['role']; label: string }> {
+    const merged: Array<{ value: User['role']; label: string }> = [...this.defaultRoleOptions];
+
+    for (const role of apiRoles) {
+      const index = merged.findIndex((item) => item.value === role.value);
+      if (index >= 0) {
+        merged[index] = role;
+      } else {
+        merged.push(role);
+      }
+    }
+
+    return merged;
+  }
+
+  private extractRoleOptions(payload: unknown): Array<{ value: User['role']; label: string }> {
+    const rawList = Array.isArray(payload)
+      ? payload
+      : payload && typeof payload === 'object' && 'data' in payload
+      ? (payload as { data?: unknown }).data
+      : [];
+
+    if (!Array.isArray(rawList)) {
+      return [];
+    }
+
+    const options = rawList
+      .map((item) => {
+        if (!item || typeof item !== 'object') {
+          return null;
+        }
+        const role = item as Record<string, unknown>;
+        const label = [role['label'], role['name'], role['nom']]
+          .find((value) => typeof value === 'string' && value.trim().length > 0) as string | undefined;
+
+        const normalizedRole = this.normalizeRoleValue(role['code'] ?? role['key'] ?? role['label'] ?? role['name']);
+        if (!normalizedRole) {
+          return null;
+        }
+
+        return {
+          value: normalizedRole,
+          label: label || this.getRoleLabel(normalizedRole),
+        };
+      })
+      .filter((item): item is { value: User['role']; label: string } => item !== null);
+
+    // Évite les doublons de valeur de rôle
+    return options.filter(
+      (option, index, array) => array.findIndex((candidate) => candidate.value === option.value) === index
+    );
+  }
+
+  private normalizeRoleValue(value: unknown): User['role'] | null {
+    const normalized = String(value ?? '')
+      .trim()
+      .toLowerCase();
+
+    if (normalized === 'admin' || normalized === 'administrateur') return 'admin';
+    if (normalized === 'superviseur') return 'superviseur';
+    if (normalized === 'agent') return 'agent';
+    return null;
   }
 
   loadUsers(): void {
+    const snapshot = this.userService.getUsersSnapshot();
+    const hadSnapshot = snapshot.length > 0;
+    if (hadSnapshot) {
+      this.users = snapshot;
+      this.applyFilters();
+    }
+
     this.userService.getUsers().subscribe({
       next: (users) => {
         this.users = users;
         this.applyFilters();
       },
       error: (error) => {
-        this.toastr.error('Erreur lors du chargement des utilisateurs', 'Erreur');
+        if (!hadSnapshot) {
+          this.toastr.error('Erreur lors du chargement des utilisateurs', 'Erreur');
+        }
         console.error('Erreur chargement utilisateurs:', error);
       }
     });
@@ -96,30 +202,25 @@ export class Users implements OnInit {
     // Recherche
     if (this.recherche.trim()) {
       const searchLower = this.recherche.toLowerCase();
-      filtered = filtered.filter(user =>
-        user.nom.toLowerCase().includes(searchLower) ||
-        user.prenom.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower) ||
-        (user.equipe && user.equipe.toLowerCase().includes(searchLower))
+      filtered = filtered.filter(
+        (user) =>
+          user.email.toLowerCase().includes(searchLower) ||
+          user.role.toLowerCase().includes(searchLower) ||
+          user.nom.toLowerCase().includes(searchLower) ||
+          user.prenom.toLowerCase().includes(searchLower)
       );
     }
 
-    // Filtre rôle
     if (this.filtreRole !== 'tous') {
-      filtered = filtered.filter(user => user.role === this.filtreRole);
+      filtered = filtered.filter((user) => user.role === this.filtreRole);
     }
 
-    // Filtre statut
     if (this.filtreStatut !== 'tous') {
-      filtered = filtered.filter(user => user.statut === this.filtreStatut);
-    }
-
-    // Filtre équipe
-    if (this.filtreEquipe !== 'toutes') {
-      filtered = filtered.filter(user => user.equipe === this.filtreEquipe);
+      filtered = filtered.filter((user) => user.statut === this.filtreStatut);
     }
 
     this.usersFiltres = filtered;
+    this.refreshPagination();
   }
 
   onRechercheChange(): void {
@@ -134,12 +235,44 @@ export class Users implements OnInit {
     this.recherche = '';
     this.filtreRole = 'tous';
     this.filtreStatut = 'tous';
-    this.filtreEquipe = 'toutes';
     this.applyFilters();
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) {
+      return;
+    }
+    this.currentPage = page;
+    this.refreshPagination();
+  }
+
+  goToPreviousPage(): void {
+    this.goToPage(this.currentPage - 1);
+  }
+
+  goToNextPage(): void {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  get totalPages(): number {
+    const total = Math.ceil(this.usersFiltres.length / this.pageSize);
+    return total > 0 ? total : 1;
+  }
+
+  get paginationStart(): number {
+    if (this.usersFiltres.length === 0) {
+      return 0;
+    }
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get paginationEnd(): number {
+    return Math.min(this.currentPage * this.pageSize, this.usersFiltres.length);
   }
 
   // Ouvrir modal création
   openCreateModal(): void {
+    this.stopSavingState();
     this.isEditing = false;
     this.currentUser = null;
     this.newUser = {
@@ -159,6 +292,7 @@ export class Users implements OnInit {
 
   // Ouvrir modal édition
   openEditModal(user: User): void {
+    this.stopSavingState();
     this.isEditing = true;
     this.currentUser = user;
     this.newUser = {
@@ -180,12 +314,24 @@ export class Users implements OnInit {
   closeUserModal(): void {
     this.showUserModal = false;
     this.currentUser = null;
+    this.stopCreateRecoveryWatcher();
+    this.stopSavingState();
   }
 
   // Sauvegarder utilisateur
   saveUser(): void {
-    // Validation
-    if (!this.newUser.nom || !this.newUser.prenom || !this.newUser.email) {
+    if (this.isSaving) {
+      return;
+    }
+
+    // Validation création: payload API = email + role
+    if (!this.isEditing && (!this.newUser.email || !this.newUser.role)) {
+      this.toastr.warning('Veuillez renseigner email et rôle.', 'Attention');
+      return;
+    }
+
+    // Validation édition (formulaire complet actuel)
+    if (this.isEditing && (!this.newUser.nom || !this.newUser.prenom || !this.newUser.email)) {
       this.toastr.warning('Veuillez remplir tous les champs obligatoires', 'Attention');
       return;
     }
@@ -197,7 +343,8 @@ export class Users implements OnInit {
       return;
     }
 
-    this.isSaving = true;
+    this.startSavingState();
+    const createdEmail = this.newUser.email.trim().toLowerCase();
 
     if (this.isEditing && this.currentUser) {
       // Mise à jour
@@ -216,20 +363,158 @@ export class Users implements OnInit {
       });
     } else {
       // Création
-      this.userService.createUser(this.newUser).subscribe({
-        next: (user) => {
-          this.isSaving = false;
-          this.closeUserModal();
-          this.loadUsers();
-          this.toastr.success(`Utilisateur "${user.prenom} ${user.nom}" créé avec succès`, 'Succès');
+      this.startCreateRecoveryWatcher(createdEmail);
+      this.userService
+        .createUser(this.newUser)
+        .pipe(
+          timeout(20000),
+          catchError((error) =>
+            this.userService.getUsers().pipe(
+              switchMap((users) => {
+                const exists = users.some((u) => u.email.toLowerCase() === createdEmail);
+                if (exists) {
+                  return of({ recovered: true });
+                }
+                return throwError(() => error);
+              })
+            )
+          ),
+          finalize(() => {
+            this.stopSavingState();
+          })
+        )
+        .subscribe({
+        next: (createdUser) => {
+          this.stopCreateRecoveryWatcher();
+          this.stopSavingState();
+          const created =
+            createdUser && typeof createdUser === 'object' && 'email' in createdUser
+              ? (createdUser as User)
+              : null;
+          this.handleUserCreated(created, this.newUser.email, this.newUser.role);
         },
         error: (error) => {
-          this.isSaving = false;
-          this.toastr.error('Erreur lors de la création de l\'utilisateur', 'Erreur');
+          this.stopCreateRecoveryWatcher();
+          this.stopSavingState();
+          const message =
+            error instanceof ApiError
+              ? `Création impossible (${error.status}) : ${error.statusText}`
+              : 'Erreur lors de la création de l\'utilisateur';
+          this.toastr.error(message, 'Erreur');
           console.error('Erreur création utilisateur:', error);
         }
       });
     }
+  }
+
+  private startSavingState(): void {
+    this.ngZone.run(() => {
+      this.isSaving = true;
+      if (this.saveFailSafeId) {
+        clearTimeout(this.saveFailSafeId);
+      }
+      this.saveFailSafeId = setTimeout(() => {
+        this.ngZone.run(() => {
+          this.isSaving = false;
+          this.saveFailSafeId = null;
+        });
+      }, 25000);
+    });
+  }
+
+  private stopSavingState(): void {
+    this.ngZone.run(() => {
+      this.isSaving = false;
+      if (this.saveFailSafeId) {
+        clearTimeout(this.saveFailSafeId);
+        this.saveFailSafeId = null;
+      }
+    });
+  }
+
+  private startCreateRecoveryWatcher(email: string): void {
+    this.stopCreateRecoveryWatcher();
+    const targetEmail = email.trim().toLowerCase();
+
+    this.createRecoverySubscription = timer(2500, 2500)
+      .pipe(
+        switchMap(() =>
+          this.userService.getUsers().pipe(
+            catchError(() => of([] as User[]))
+          )
+        )
+      )
+      .subscribe((users) => {
+        const created = users.some((user) => user.email.trim().toLowerCase() === targetEmail);
+        if (!created || !this.isSaving) {
+          return;
+        }
+
+        this.stopCreateRecoveryWatcher();
+        this.stopSavingState();
+        const foundUser = users.find((user) => user.email.trim().toLowerCase() === targetEmail) ?? null;
+        this.handleUserCreated(foundUser, email, this.newUser.role);
+      });
+  }
+
+  private stopCreateRecoveryWatcher(): void {
+    if (this.createRecoverySubscription) {
+      this.createRecoverySubscription.unsubscribe();
+      this.createRecoverySubscription = null;
+    }
+  }
+
+  private handleUserCreated(createdUser: User | null, createdEmail: string, createdRole: User['role']): void {
+    const fallbackUser: User = {
+      id: createdUser?.id || `tmp-${Date.now()}`,
+      nom: createdUser?.nom || '',
+      prenom: createdUser?.prenom || '',
+      email: (createdUser?.email || createdEmail).trim().toLowerCase(),
+      role: createdUser?.role || createdRole,
+      statut: createdUser?.statut || 'actif',
+      dateEntree: createdUser?.dateEntree || new Date(),
+      equipe: createdUser?.equipe,
+      competences: createdUser?.competences || [],
+      langues: createdUser?.langues || ['fr'],
+      specialites: createdUser?.specialites || [],
+    };
+
+    // Force la visibilité du nouvel utilisateur dans le tableau.
+    this.recherche = '';
+    this.filtreRole = 'tous';
+    this.filtreStatut = 'tous';
+    this.currentPage = 1;
+    this.insertOrReplaceUserInList(fallbackUser);
+
+    // Fermeture immédiate du popup dès confirmation de création.
+    this.showUserModal = false;
+    this.currentUser = null;
+    this.stopCreateRecoveryWatcher();
+    this.stopSavingState();
+    this.cdr.detectChanges();
+
+    // Revenir explicitement sur la liste puis synchroniser les données.
+    this.router.navigate(['/users']).finally(() => {
+      this.loadUsers();
+    });
+    this.toastr.success(`Utilisateur "${fallbackUser.email}" créé avec succès`, 'Succès');
+  }
+
+  private insertOrReplaceUserInList(user: User): void {
+    const emailKey = user.email.trim().toLowerCase();
+    const index = this.users.findIndex(
+      (candidate) =>
+        (user.id && candidate.id === user.id) ||
+        candidate.email.trim().toLowerCase() === emailKey
+    );
+
+    if (index >= 0) {
+      this.users[index] = { ...this.users[index], ...user };
+    } else {
+      this.users = [user, ...this.users];
+    }
+
+    this.applyFilters();
   }
 
   // Ouvrir modal suppression
@@ -281,9 +566,7 @@ export class Users implements OnInit {
     const labels: { [key: string]: string } = {
       'admin': 'Administrateur',
       'superviseur': 'Superviseur',
-      'agent_senior': 'Agent Senior',
-      'agent': 'Agent',
-      'stagiaire': 'Stagiaire'
+      'agent': 'Agent'
     };
     return labels[role] || role;
   }
@@ -314,6 +597,18 @@ export class Users implements OnInit {
     return `${user.prenom} ${user.nom}`;
   }
 
+  trackByUserId(index: number, user: User): string {
+    return user.id || `user-${index}`;
+  }
+
+  trackByTextValue(index: number, value: string): string {
+    return `${value}-${index}`;
+  }
+
+  trackByOptionValue(index: number, option: { value: string }): string {
+    return option.value || `option-${index}`;
+  }
+
   // Gestion compétences
   addCompetence(): void {
     const competence = prompt('Entrez une compétence:');
@@ -340,5 +635,19 @@ export class Users implements OnInit {
 
   removeSpecialite(specialite: string): void {
     this.newUser.specialites = this.newUser.specialites.filter(s => s !== specialite);
+  }
+
+  private refreshPagination(): void {
+    const maxPage = this.totalPages;
+    if (this.currentPage > maxPage) {
+      this.currentPage = maxPage;
+    }
+    if (this.currentPage < 1) {
+      this.currentPage = 1;
+    }
+
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    this.usersAffiches = this.usersFiltres.slice(start, end);
   }
 }

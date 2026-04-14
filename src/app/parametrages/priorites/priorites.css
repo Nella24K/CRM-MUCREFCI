@@ -1,0 +1,114 @@
+.settings-page {
+  padding: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.btn-back {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-create {
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-create:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.create-form {
+  margin-bottom: 1rem;
+  display: grid;
+  gap: 0.4rem;
+  max-width: 420px;
+}
+
+.create-form label {
+  color: #334155;
+  font-weight: 600;
+}
+
+.create-form input {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.6rem 0.7rem;
+}
+
+.feedback {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+}
+
+.feedback.success {
+  color: #15803d;
+}
+
+.feedback.error {
+  color: #b91c1c;
+}
+
+.table-wrapper {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.loading-state {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  color: #475569;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+  background: #f8fafc;
+  font-size: 0.85rem;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.empty-row {
+  text-align: center;
+  color: #64748b;
+}

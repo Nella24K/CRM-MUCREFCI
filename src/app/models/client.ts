@@ -21,4 +21,17 @@ export interface Client {
   identifiantProspectTemporaire?: string; // Identifiant prospect temporaire
   domaineEmail?: string; // Domaine email (pour statistiques)
   datePremierContact?: Date; // Date du premier email reçu
+
+  // Champs API création client
+  tag?: string;
+  matricule?: string;
+  firstname?: string;
+  lastname?: string;
+  birthdate?: string;
+  lieu_naissance?: string;
+  nationalite?: string;
+  categorie_professionnelle?: string;
+  status?: string;
+  phone?: string;
+  whatsapp?: string;
 }

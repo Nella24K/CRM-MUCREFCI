@@ -1,0 +1,31 @@
+<div class="create-role-page">
+  <div class="header">
+    <div>
+      <h1>Créer un rôle</h1>
+      <p>Définissez le libellé, le niveau et la catégorie associée.</p>
+    </div>
+    <button type="button" class="btn-secondary" (click)="goToParametrages()">Retour</button>
+  </div>
+
+  <form class="form-card" (ngSubmit)="submit()">
+    <div class="grid">
+      <label for="role-label">Label *<input id="role-label" type="text" name="label" [(ngModel)]="newRole.label" placeholder="Ex: Responsable support" [disabled]="isSubmitting" /></label>
+      <label for="role-niveau">Niveau *<input id="role-niveau" type="text" name="niveau" [(ngModel)]="newRole.niveau" placeholder="Ex: 1" [disabled]="isSubmitting" /></label>
+      <label for="role-max-tickets">Max tickets<input id="role-max-tickets" type="number" name="maxTickets" [(ngModel)]="newRole.maxTickets" [disabled]="isSubmitting" /></label>
+      <label for="role-category-id">Catégorie *<select id="role-category-id" name="category" [(ngModel)]="selectedCategoryId" [disabled]="isSubmitting || isLoadingCategories">
+          <option value="">-- Sélectionner une catégorie --</option>
+          <option *ngFor="let category of categoryOptions" [value]="category.id">{{ category.label }}</option>
+        </select></label>
+    </div>
+    <small class="hint" *ngIf="isLoadingCategories">Chargement des catégories...</small>
+    <small class="hint error" *ngIf="categoryErrorMessage">{{ categoryErrorMessage }}</small>
+
+    <div class="actions">
+      <button type="button" class="btn-secondary" (click)="goBack()" [disabled]="isSubmitting">Annuler</button>
+      <button type="submit" class="btn-primary" [disabled]="isSubmitting || isLoadingCategories">
+        <span *ngIf="!isSubmitting">Créer le rôle</span>
+        <span *ngIf="isSubmitting">Création...</span>
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,220 @@
+<div class="messagerie-page">
+  <div class="messagerie-header">
+    <div class="header-title">
+      <h1>MESSAGERIE</h1>
+      <p class="subtitle">Templates et envoi de messages</p>
+    </div>
+
+    <div class="messagerie-header-actions">
+      <button type="button" class="messagerie-btn" (click)="openCreateTemplate()">
+        Créer un template
+      </button>
+      <button type="button" class="messagerie-btn messagerie-btn-primary" (click)="openSendMessagePopup()">
+        Envoyer un nouveau message
+      </button>
+    </div>
+  </div>
+
+  <!-- Popup canal de message -->
+  <div class="modal-overlay" *ngIf="showSendPopup" (click)="closeSendMessagePopup()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Envoyer un nouveau message</h2>
+        <button class="modal-close" type="button" (click)="closeSendMessagePopup()" aria-label="Fermer">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Choisir un canal</label>
+          <select class="form-select" [(ngModel)]="messageChannel">
+            <option value="email">Email</option>
+            <option value="whatsapp">WhatsApp</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeSendMessagePopup()">Annuler</button>
+        <button type="button" class="btn-submit" (click)="confirmSendMessage()">Continuer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Composer Email type Outlook -->
+  <div class="modal-overlay" *ngIf="showEmailComposePopup" (click)="closeEmailComposePopup()">
+    <div class="outlook-compose modal-content modal-compose" (click)="$event.stopPropagation()">
+      <div class="outlook-toolbar">
+        <div class="outlook-toolbar-left">
+          <span class="outlook-title">Nouvel email</span>
+        </div>
+        <button class="modal-close" type="button" (click)="closeEmailComposePopup()" aria-label="Fermer">×</button>
+      </div>
+
+      <div class="modal-body outlook-body">
+        <div class="composer-grid">
+          <div class="form-group">
+            <label>À</label>
+            <input type="email" class="form-input" [(ngModel)]="emailTo" placeholder="adresse@email.com" />
+          </div>
+
+          <div class="form-group">
+            <label>Template</label>
+            <select
+              class="form-select"
+              [(ngModel)]="selectedEmailTemplateId"
+              (ngModelChange)="onEmailTemplateChange()"
+            >
+              <option *ngFor="let tpl of emailTemplates" [value]="tpl.id">
+                {{ tpl.nom }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group composer-full">
+            <label>Objet</label>
+            <input type="text" class="form-input" [(ngModel)]="emailSubject" placeholder="Objet de l'email" />
+          </div>
+
+          <div class="form-group composer-full">
+            <label>Contenu</label>
+            <textarea class="form-textarea form-textarea-editor" rows="12" [(ngModel)]="emailBody"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer outlook-footer">
+        <button type="button" class="btn-cancel" (click)="closeEmailComposePopup()">Annuler</button>
+        <button type="button" class="btn-submit" (click)="sendEmail()">Envoyer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Composer WhatsApp (placeholder) -->
+  <div class="modal-overlay" *ngIf="showWhatsappComposePopup" (click)="closeWhatsappComposePopup()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Composer WhatsApp</h2>
+        <button class="modal-close" type="button" (click)="closeWhatsappComposePopup()" aria-label="Fermer">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Numéro / destinataire</label>
+          <input
+            type="tel"
+            class="form-input"
+            [(ngModel)]="whatsappTo"
+            placeholder="+225 07 12 34 56 78"
+          />
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Template (WhatsApp)</label>
+          <select
+            class="form-select"
+            [(ngModel)]="selectedWhatsappTemplateId"
+            (ngModelChange)="onWhatsappTemplateChange()"
+          >
+            <option *ngFor="let tpl of whatsappTemplates" [value]="tpl.id">
+              {{ tpl.nom }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Message</label>
+          <textarea
+            class="form-textarea"
+            rows="10"
+            [(ngModel)]="whatsappBody"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeWhatsappComposePopup()">Annuler</button>
+        <button type="button" class="btn-submit" (click)="sendWhatsapp()">Envoyer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Templates -->
+  <div class="templates-section">
+    <div class="templates-header">
+      <h2>Templates de messages</h2>
+      <p>Réception ticket, clôture, satisfaction… et autres modèles prêts à utiliser.</p>
+    </div>
+
+    <div class="templates-table-wrapper">
+      <table class="templates-table">
+        <thead>
+          <tr>
+            <th>Template</th>
+            <th>Canal</th>
+            <th>Contenu</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tpl of templates">
+            <td class="cell-tpl-nom">
+              <div class="tpl-name">{{ tpl.nom }}</div>
+              <div class="tpl-category">{{ tpl.categorie | titlecase }}</div>
+            </td>
+            <td>
+              <span class="canal-badge">{{ getCanalLabel(tpl.canal) }}</span>
+            </td>
+            <td>
+              <div class="tpl-preview" [title]="tpl.contenu">{{ preview(tpl.contenu) }}</div>
+            </td>
+            <td class="cell-actions">
+              <button type="button" class="btn-action btn-edit" (click)="openEditTemplate(tpl)">
+                Modifier
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Popup édition template -->
+  <div class="modal-overlay" *ngIf="showEditTemplatePopup" (click)="closeEditTemplatePopup()">
+    <div class="modal-content modal-content-wide" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ templateEditingId ? 'Modifier le template' : 'Créer un template' }}</h2>
+        <button class="modal-close" type="button" (click)="closeEditTemplatePopup()" aria-label="Fermer">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" class="form-input" [(ngModel)]="templateDraft.nom" placeholder="Nom du template" />
+          </div>
+
+          <div class="form-group">
+            <label>Canal</label>
+            <select class="form-select" [(ngModel)]="templateDraft.canal">
+              <option value="email">Email</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Contenu</label>
+          <textarea
+            class="form-textarea"
+            rows="8"
+            [(ngModel)]="templateDraft.contenu"
+            placeholder="Texte du template (vous pouvez utiliser {{'{{ticketReference}}'}} dans le contenu)"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeEditTemplatePopup()">Annuler</button>
+        <button type="button" class="btn-submit" (click)="saveTemplate()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>

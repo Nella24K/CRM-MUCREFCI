@@ -1,0 +1,38 @@
+<div class="create-client-page">
+  <div class="header">
+    <div>
+      <h1>Modifier client</h1>
+      <p>Mettez à jour les informations puis enregistrez.</p>
+    </div>
+    <button type="button" class="btn-secondary" (click)="goBack()">Retour</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loader">Chargement...</div>
+
+  <form class="form-card" *ngIf="!isLoading" (ngSubmit)="submit()">
+    <div class="grid">
+      <label>Tag<input type="text" name="tag" [(ngModel)]="formData.tag" /></label>
+      <label>Matricule<input type="text" name="matricule" [(ngModel)]="formData.matricule" /></label>
+      <label>Prénom *<input type="text" name="firstname" [(ngModel)]="formData.firstname" required /></label>
+      <label>Nom *<input type="text" name="lastname" [(ngModel)]="formData.lastname" required /></label>
+      <label>Date de naissance<input type="date" name="birthdate" [(ngModel)]="formData.birthdate" /></label>
+      <label>Lieu de naissance<input type="text" name="lieu_naissance" [(ngModel)]="formData.lieu_naissance" /></label>
+      <label>Nationalité<input type="text" name="nationalite" [(ngModel)]="formData.nationalite" /></label>
+      <label>Catégorie professionnelle<input type="text" name="categorie_professionnelle" [(ngModel)]="formData.categorie_professionnelle" /></label>
+      <label>Statut<input type="text" name="status" [(ngModel)]="formData.status" /></label>
+      <label>Email *<input type="email" name="email" [(ngModel)]="formData.email" required /></label>
+      <label>Téléphone<input type="text" name="phone" [(ngModel)]="formData.phone" /></label>
+      <label>WhatsApp<input type="text" name="whatsapp" [(ngModel)]="formData.whatsapp" /></label>
+    </div>
+
+    <label class="full-width">Adresse<input type="text" name="adresse" [(ngModel)]="formData.adresse" /></label>
+
+    <div class="actions">
+      <button type="button" class="btn-secondary" (click)="goBack()" [disabled]="isSubmitting">Annuler</button>
+      <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Enregistrer</span>
+        <span *ngIf="isSubmitting">Modification...</span>
+      </button>
+    </div>
+  </form>
+</div>

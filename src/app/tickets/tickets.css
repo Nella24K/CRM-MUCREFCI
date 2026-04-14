@@ -233,192 +233,163 @@
   height: 18px;
 }
 
-/* Liste des tickets */
-.tickets-list {
-  display: grid;
-  gap: 1rem;
-}
-
-.ticket-card {
+/* Tableau des tickets */
+.table-wrapper {
   background: var(--surface);
+  border-radius: 14px;
   border: 1px solid rgba(226, 232, 240, 0.6);
-  border-radius: 18px;
-  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
+  overflow-x: auto;
+}
+
+.tickets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tickets-table thead {
+  background: #f1f5f9;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tickets-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.tickets-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(226, 232, 240, 0.5);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
+  transition: background 0.2s ease;
 }
 
-.ticket-card:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(37, 99, 235, 0.1);
-  transform: translateY(-6px) scale(1.01);
-  border-left: 5px solid var(--primary-color);
+.tickets-table tbody tr:hover {
+  background: #f8fafc;
 }
 
-.ticket-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-  gap: 1rem;
-  flex-wrap: wrap;
+.tickets-table tbody tr:last-child {
+  border-bottom: none;
 }
 
-.ticket-ref-section {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+.tickets-table td {
+  padding: 0.875rem 1rem;
+  color: var(--text-secondary);
+  vertical-align: middle;
 }
 
-.ticket-reference {
-  font-size: 1.125rem;
-  font-weight: 700;
+.tickets-table .cell-ref {
+  font-weight: 600;
   color: var(--primary-color);
   font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
 }
 
-.email-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  background: rgba(14, 165, 233, 0.1);
-  color: var(--accent-color);
-  border-radius: 20px;
-  font-size: 0.8125rem;
+.tickets-table .cell-objet {
   font-weight: 600;
-  border: 1px solid rgba(14, 165, 233, 0.2);
+  color: var(--text-primary);
+  max-width: 220px;
 }
 
-.email-badge svg {
-  width: 14px;
-  height: 14px;
+.tickets-table .cell-badges {
+  white-space: nowrap;
 }
 
-.ticket-badges {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+.table-row:hover .cell-ref,
+.table-row:hover .cell-objet {
+  color: var(--primary-color);
 }
 
+/* Badges dans le tableau */
 .status-badge,
 .priority-badge,
 .canal-badge {
-  padding: 0.5rem 0.875rem;
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
   border-radius: 20px;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: capitalize;
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.ticket-card:hover .status-badge,
-.ticket-card:hover .priority-badge,
-.ticket-card:hover .canal-badge {
-  transform: scale(1.05);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .status-nouveau {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.12);
   color: var(--primary-color);
 }
 
 .status-en_cours {
-  background: rgba(14, 165, 233, 0.1);
+  background: rgba(14, 165, 233, 0.12);
   color: var(--accent-color);
 }
 
 .status-en_attente,
 .status-en_attente_client {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(245, 158, 11, 0.12);
   color: var(--warning-color);
 }
 
 .status-resolu {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.12);
   color: var(--success-color);
 }
 
 .status-clos {
-  background: rgba(100, 116, 139, 0.1);
+  background: rgba(100, 116, 139, 0.12);
   color: var(--text-secondary);
 }
 
 .status-en_retard {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.12);
   color: var(--error-color);
 }
 
 .priority-basse {
-  background: rgba(100, 116, 139, 0.1);
+  background: rgba(100, 116, 139, 0.12);
   color: var(--text-secondary);
 }
 
 .priority-normale {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.12);
   color: var(--primary-color);
 }
 
 .priority-haute {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(245, 158, 11, 0.12);
   color: var(--warning-color);
 }
 
 .priority-urgente {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.12);
   color: var(--error-color);
 }
 
 .canal-email {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.12);
   color: var(--primary-color);
 }
 
 .canal-whatsapp {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.12);
   color: var(--success-color);
 }
 
-
-.ticket-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.ticket-objet {
-  font-size: 1.125rem;
+.mini-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
 }
 
-.ticket-meta {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.meta-item svg {
-  width: 16px;
-  height: 16px;
-  color: var(--text-secondary);
+.mini-badge.email {
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--accent-color);
 }
 
 /* État vide */
@@ -460,13 +431,13 @@
     grid-template-columns: 1fr;
   }
 
-  .ticket-card-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .tickets-table th,
+  .tickets-table td {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
-  .ticket-meta {
-    flex-direction: column;
-    gap: 0.75rem;
+  .tickets-table .cell-objet {
+    max-width: 160px;
   }
 }

@@ -6,12 +6,11 @@
       <p class="subtitle">Gestion de la base clients</p>
     </div>
     <div class="header-actions">
-      <button class="btn-create-client" (click)="openCreateModal()">
+      <button class="btn-create-client" (click)="navigateToCreateClient()">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Nouveau client
+        Créer un client
       </button>
       <div class="header-stats">
         <div class="stat-card">
@@ -36,227 +35,90 @@
       <input
         type="text"
         class="search-input"
-        placeholder="Rechercher par nom, email ou entreprise..."
+        placeholder="Rechercher par nom, matricule ou email..."
         [(ngModel)]="recherche"
         (input)="onRechercheChange()"
       />
     </div>
 
-    <div class="filters-grid">
-      <div class="filter-group">
-        <label class="filter-label">Statut</label>
-        <select class="filter-select" [(ngModel)]="filtreStatut" (change)="onFiltreChange()">
-          <option value="tous">Tous les statuts</option>
-          <option value="actif">Actif</option>
-          <option value="inactif">Inactif</option>
-          <option value="prospect">Prospect</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">Source</label>
-        <select class="filter-select" [(ngModel)]="filtreCreeParEmail" (change)="onFiltreChange()">
-          <option [ngValue]="null">Toutes les sources</option>
-          <option [ngValue]="true">Créés par email</option>
-          <option [ngValue]="false">Autres sources</option>
-        </select>
-      </div>
-
-      <div class="filter-group">
-        <label class="filter-label">Tag</label>
-        <select class="filter-select" [(ngModel)]="filtreNouveauContact" (change)="onFiltreChange()">
-          <option [ngValue]="null">Tous les contacts</option>
-          <option [ngValue]="true">Nouveau Contact</option>
-          <option [ngValue]="false">Contacts existants</option>
-        </select>
-      </div>
-
-      <button class="btn-reset" (click)="resetFilters()">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M10 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Réinitialiser
-      </button>
-    </div>
   </div>
 
-  <!-- Liste des clients -->
-  <div class="clients-list" *ngIf="clientsFiltres.length > 0">
-    <div *ngFor="let client of clientsFiltres" class="client-card" (click)="viewClient(client.id)">
-      <div class="client-card-header">
-        <div class="client-name-section">
-          <h3 class="client-name">{{ getClientDisplayName(client) }}</h3>
-          <div class="client-badges">
-            <span class="statut-badge" [ngClass]="getStatutClass(client.statut)">
-              {{ getStatutLabel(client.statut) }}
-            </span>
-            <span class="email-badge" *ngIf="client.creeParEmail" title="Client créé automatiquement par email">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="L22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Créé par email
-            </span>
-            <span class="nouveau-contact-badge" *ngIf="client.tagNouveauContact" title="Nouveau contact">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                <path d="M12 8V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Nouveau Contact
-            </span>
-          </div>
-        </div>
-      </div>
+  <div class="table-loader" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement des clients...</p>
+  </div>
 
-      <div class="client-card-body">
-        <div class="client-info">
-          <div class="info-item">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="L22 6L12 13L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>{{ client.email }}</span>
-          </div>
-          <div class="info-item" *ngIf="client.entreprise">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" stroke-width="2"/>
-              <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <span>{{ client.entreprise }}</span>
-          </div>
-          <div class="info-item" *ngIf="client.telephone">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22 16.92V19.92C22 20.52 21.52 21 20.92 21C9.4 21 0 11.6 0 0.08C0 -0.52 0.48 -1 1.08 -1H4.08C4.68 -1 5.16 -0.52 5.16 0.08C5.16 1.08 5.32 2.04 5.64 2.92C5.8 3.36 5.72 3.88 5.4 4.24L3.64 6C5.08 9.16 7.84 11.92 11 13.36L12.76 11.6C13.12 11.28 13.64 11.2 14.08 11.36C14.96 11.68 15.92 11.84 16.92 11.84C17.52 11.84 18 12.32 18 12.92V15.92C18 16.52 17.52 17 16.92 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>{{ client.telephone }}</span>
-          </div>
-          <div class="info-item">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-              <polyline points="12 6 12 12 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>Créé le {{ formatDate(client.dateCreation) }}</span>
-          </div>
-          <div class="info-item" *ngIf="client.domaineEmail">
-            <span class="domaine-label">Domaine:</span>
-            <span class="domaine-value">{{ client.domaineEmail }}</span>
-          </div>
-        </div>
-      </div>
+  <!-- Tableau des clients -->
+  <div class="table-wrapper" *ngIf="!isLoading && clientsFiltres.length > 0">
+    <table class="clients-table">
+      <thead>
+        <tr>
+          <th>Tag</th>
+          <th>Matricule</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Catégorie pro</th>
+          <th>Statut</th>
+          <th>Email</th>
+          <th>WhatsApp</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let client of clientsAffiches; trackBy: trackByClientId" class="table-row">
+          <td>{{ client.tag || '—' }}</td>
+          <td>{{ client.matricule || '—' }}</td>
+          <td>{{ client.lastname || client.nom || '—' }}</td>
+          <td>{{ client.firstname || client.prenom || '—' }}</td>
+          <td>{{ client.categorie_professionnelle || '—' }}</td>
+          <td>{{ client.status || client.statut }}</td>
+          <td>{{ client.email || '—' }}</td>
+          <td>{{ client.whatsapp || '—' }}</td>
+          <td class="cell-actions">
+            <button type="button" class="action-btn icon-btn" (click)="viewClient(client.id)" aria-label="Voir plus">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </button>
+            <button type="button" class="action-btn icon-btn edit" (click)="editClient(client.id)" aria-label="Modifier">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 20H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16.5 3.5C17.3284 2.67157 18.6716 2.67157 19.5 3.5V3.5C20.3284 4.32843 20.3284 5.67157 19.5 6.5L7 19L3 20L4 16L16.5 3.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button type="button" class="action-btn icon-btn delete" [disabled]="deletingClientId === client.id" (click)="deleteClient(client)" aria-label="Supprimer">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="!isLoading && clientsFiltres.length > 0">
+    <div class="pagination-controls">
+      <button type="button" (click)="goToPreviousPage()" [disabled]="currentPage === 1">Précédent</button>
+      <button type="button" (click)="goToNextPage()" [disabled]="currentPage === totalPages">Suivant</button>
     </div>
   </div>
 
   <!-- Message si aucun client -->
-  <div class="empty-state" *ngIf="clientsFiltres.length === 0">
+  <div class="empty-state" *ngIf="!isLoading && clientsFiltres.length === 0">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
     </svg>
     <h3>Aucun client trouvé</h3>
-    <p *ngIf="recherche || filtreStatut !== 'tous' || filtreCreeParEmail !== null || filtreNouveauContact !== null">
+    <p *ngIf="recherche">
       Aucun client ne correspond à vos critères de recherche.
     </p>
-    <p *ngIf="!recherche && filtreStatut === 'tous' && filtreCreeParEmail === null && filtreNouveauContact === null">
+    <p *ngIf="!recherche">
       Aucun client n'a été enregistré pour le moment.
     </p>
   </div>
 
-  <!-- Modal de création de client -->
-  <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Nouveau client</h2>
-        <button class="modal-close" (click)="closeCreateModal()">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <form (ngSubmit)="createClient()">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Nom <span class="required">*</span></label>
-              <input type="text" [(ngModel)]="newClient.nom" name="nom" required placeholder="Nom du client">
-            </div>
-            <div class="form-group">
-              <label>Prénom</label>
-              <input type="text" [(ngModel)]="newClient.prenom" name="prenom" placeholder="Prénom">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Email <span class="required">*</span></label>
-              <input type="email" [(ngModel)]="newClient.email" name="email" required placeholder="email@exemple.com">
-            </div>
-            <div class="form-group">
-              <label>Téléphone</label>
-              <input type="tel" [(ngModel)]="newClient.telephone" name="telephone" placeholder="+225 07 12 34 56 78">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Entreprise</label>
-            <input type="text" [(ngModel)]="newClient.entreprise" name="entreprise" placeholder="Nom de l'entreprise">
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Ville</label>
-              <input type="text" [(ngModel)]="newClient.ville" name="ville" placeholder="Ville">
-            </div>
-            <div class="form-group">
-              <label>Code postal</label>
-              <input type="text" [(ngModel)]="newClient.codePostal" name="codePostal" placeholder="Code postal">
-            </div>
-            <div class="form-group">
-              <label>Pays</label>
-              <input type="text" [(ngModel)]="newClient.pays" name="pays" placeholder="Pays">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Adresse</label>
-            <input type="text" [(ngModel)]="newClient.adresse" name="adresse" placeholder="Adresse complète">
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label>Secteur</label>
-              <input type="text" [(ngModel)]="newClient.secteur" name="secteur" placeholder="Secteur d'activité">
-            </div>
-            <div class="form-group">
-              <label>Statut</label>
-              <select [(ngModel)]="newClient.statut" name="statut">
-                <option value="prospect">Prospect</option>
-                <option value="actif">Actif</option>
-                <option value="inactif">Inactif</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>Notes</label>
-            <textarea [(ngModel)]="newClient.notes" name="notes" rows="3" placeholder="Notes internes sur le client"></textarea>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn-cancel" (click)="closeCreateModal()" [disabled]="isCreating">
-              Annuler
-            </button>
-            <button type="submit" class="btn-submit" [disabled]="isCreating">
-              <span *ngIf="!isCreating">Créer le client</span>
-              <span *ngIf="isCreating">Création en cours...</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
 </div>

@@ -270,153 +270,263 @@
   height: 18px;
 }
 
-/* Liste des clients */
-.clients-list {
-  display: grid;
-  gap: 1rem;
+/* Tableau des clients */
+.table-wrapper {
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
+  overflow-x: auto;
 }
 
-.client-card {
+.pagination {
+  margin-top: 1rem;
   background: var(--surface);
   border: 1px solid rgba(226, 232, 240, 0.6);
-  border-radius: 18px;
-  padding: 1.75rem;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(226, 232, 240, 0.5);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-}
-
-.client-card:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1), 0 6px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(37, 99, 235, 0.1);
-  transform: translateY(-6px) scale(1.01);
-  border-left: 5px solid var(--primary-color);
-}
-
-.client-card-header {
-  margin-bottom: 1rem;
-}
-
-.client-name-section {
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.client-name {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.client-badges {
-  display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.9rem;
   flex-wrap: wrap;
 }
 
-.statut-badge {
-  padding: 0.5rem 0.875rem;
-  border-radius: 20px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-transform: capitalize;
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.pagination-info {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-.client-card:hover .statut-badge,
-.client-card:hover .email-badge,
-.client-card:hover .nouveau-contact-badge {
-  transform: scale(1.05);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+.pagination-size {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-size label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.pagination-size select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.current-page {
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.pagination-controls button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination-controls button.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.clients-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.clients-table thead {
+  background: #f1f5f9;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.clients-table th {
+  padding: 0.875rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.clients-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.clients-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.clients-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.clients-table td {
+  padding: 0.875rem 1rem;
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+
+.clients-table .cell-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.clients-table .cell-badges {
+  white-space: nowrap;
+}
+
+.table-row:hover .cell-name {
+  color: var(--primary-color);
+}
+
+.statut-badge {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
 }
 
 .statut-actif {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.12);
   color: var(--success-color);
 }
 
 .statut-inactif {
-  background: rgba(100, 116, 139, 0.1);
+  background: rgba(100, 116, 139, 0.12);
   color: var(--text-secondary);
 }
 
 .statut-prospect {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(245, 158, 11, 0.12);
   color: var(--warning-color);
 }
 
-.email-badge,
-.nouveau-contact-badge {
+.mini-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.mini-badge.email {
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--accent-color);
+}
+
+.mini-badge.nouveau {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success-color);
+}
+
+.table-loader {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #cbd5e1;
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  margin: 0 auto 0.7rem;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.cell-actions {
+  display: flex;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.action-btn {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  border: 1px solid;
+  justify-content: center;
+  padding: 0;
 }
 
-.email-badge {
-  background: rgba(14, 165, 233, 0.1);
-  color: var(--accent-color);
-  border-color: rgba(14, 165, 233, 0.2);
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
-.nouveau-contact-badge {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--success-color);
-  border-color: rgba(16, 185, 129, 0.2);
+.action-btn.edit {
+  border-color: #93c5fd;
+  color: #1d4ed8;
 }
 
-.email-badge svg,
-.nouveau-contact-badge svg {
-  width: 14px;
-  height: 14px;
+.action-btn.delete {
+  border-color: #fca5a5;
+  color: #dc2626;
 }
 
-.client-card-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.action-btn:hover:not(:disabled) {
+  background: #f8fafc;
 }
 
-.client-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.9375rem;
-  color: var(--text-secondary);
-}
-
-.info-item svg {
-  width: 18px;
-  height: 18px;
-  color: var(--text-secondary);
-  flex-shrink: 0;
-}
-
-.domaine-label {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.domaine-value {
-  color: var(--primary-color);
-  font-weight: 500;
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* État vide */
@@ -644,18 +754,15 @@
     grid-template-columns: 1fr;
   }
 
-  .client-info {
-    gap: 0.5rem;
-  }
-
   .header-actions {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .btn-create-client {
-    width: 100%;
-    justify-content: center;
+  .clients-table th,
+  .clients-table td {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
   .modal-content {

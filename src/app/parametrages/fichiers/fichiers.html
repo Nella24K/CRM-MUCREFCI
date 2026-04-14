@@ -1,0 +1,28 @@
+<div class="settings-page">
+  <div class="page-header">
+    <h1>Fichiers</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-back" (click)="goToParametrages()">Retour</button>
+      <button type="button" class="btn-create">Créer une règle</button>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Extension</th>
+          <th>Taille max</th>
+          <th>Autorisé</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let fichier of fichiers">
+          <td>{{ fichier.extension }}</td>
+          <td>{{ fichier.tailleMax }}</td>
+          <td>{{ fichier.autorise }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -19,7 +19,7 @@
 
 .sidebar.collapsed {
   width: 80px;
-  overflow: visible;
+  overflow: hidden; /* éviter le débordement des box-shadows */
 }
 
 .sidebar.collapsed .sidebar-nav {
@@ -290,6 +290,8 @@
 
 .sidebar.collapsed .nav-item.active {
   background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .sidebar.collapsed .nav-item.active::before {
@@ -299,6 +301,7 @@
 .sidebar.collapsed .nav-item:hover {
   background: var(--background) !important;
   transform: none;
+  box-shadow: none !important;
 }
 
 .nav-icon {

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { catchError, of } from 'rxjs';
 import { SupervisionService } from '../services/supervision';
 import { UserService } from '../services/user';
 import { TicketService } from '../services/ticket';
@@ -18,6 +19,18 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class Supervision implements OnInit {
   readonly Math = Math;
+  private readonly fallbackTeamStats: TeamStats = {
+    agentsActifs: 0,
+    agentsEnPause: 0,
+    agentsHorsLigne: 0,
+    totalAgents: 0,
+    statutGlobal: 'operationnel',
+    ticketsAssignes: 0,
+    ticketsEnCours: 0,
+    ticketsEnAttenteClient: 0,
+    ticketsEnRetard: 0,
+    capaciteRestante: 0,
+  };
   
   // Statistiques équipe
   teamStats: TeamStats | null = null;
@@ -26,6 +39,10 @@ export class Supervision implements OnInit {
   // Agents
   agents: Agent[] = [];
   agentsFiltres: Agent[] = [];
+  agentsPage: Agent[] = [];
+  pageSize: number = 6;
+  currentPage: number = 1;
+  totalPages: number = 1;
 
   // Alertes
   alertes: Alerte[] = [];
@@ -59,41 +76,69 @@ export class Supervision implements OnInit {
   }
 
   loadData(): void {
-    this.isLoading = true;
-    
-    // Charger les stats équipe
-    this.supervisionService.getTeamStats().subscribe({
-      next: (stats) => {
+    // Affichage immédiat pour éviter l'effet "refresh infini".
+    if (!this.teamStats) {
+      this.teamStats = this.fallbackTeamStats;
+    }
+    if (this.alertes.length === 0) {
+      this.alertes = [];
+    }
+    if (this.agents.length === 0) {
+      this.agents = [];
+      this.applyFilters();
+    }
+    this.isLoading = false;
+
+    // Rafraîchissement en arrière-plan avec fallback.
+    this.supervisionService
+      .getTeamStats()
+      .pipe(
+        catchError((error) => {
+          console.error('Erreur chargement stats équipe:', error);
+          return of(this.teamStats || this.fallbackTeamStats);
+        })
+      )
+      .subscribe((stats) => {
         this.teamStats = stats;
-      },
-      error: (error) => {
-        console.error('Erreur chargement stats équipe:', error);
-      }
-    });
+      });
 
-    // Charger les agents
-    this.userService.getUsers().subscribe({
-      next: (users) => {
-        // Transformer les Users en Agents avec performances
-        this.agents = users.map(user => this.transformUserToAgent(user));
-        this.applyFilters();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Erreur chargement agents:', error);
-        this.isLoading = false;
-      }
-    });
-
-    // Charger les alertes
-    this.supervisionService.getAlertes().subscribe({
-      next: (alertes) => {
+    this.supervisionService
+      .getAlertes()
+      .pipe(
+        catchError((error) => {
+          console.error('Erreur chargement alertes:', error);
+          return of([] as Alerte[]);
+        })
+      )
+      .subscribe((alertes) => {
         this.alertes = alertes;
-      },
-      error: (error) => {
-        console.error('Erreur chargement alertes:', error);
-      }
-    });
+      });
+
+    this.userService
+      .getUsers()
+      .pipe(
+        catchError((error) => {
+          console.error('Erreur chargement agents:', error);
+          return of(this.agents.map((agent) => ({
+            id: agent.id,
+            nom: agent.nom,
+            prenom: agent.prenom,
+            email: agent.email,
+            role: agent.role,
+            statut: agent.statut,
+            dateEntree: agent.dateEntree,
+            equipe: agent.equipe,
+            competences: agent.competences || [],
+            langues: [],
+            specialites: [],
+          })) as User[]);
+        })
+      )
+      .subscribe((users) => {
+        // Transformer les Users en Agents avec performances
+        this.agents = users.map((user) => this.transformUserToAgent(user));
+        this.applyFilters();
+      });
   }
 
   transformUserToAgent(user: User): Agent {
@@ -141,10 +186,36 @@ export class Supervision implements OnInit {
     }
 
     this.agentsFiltres = filtered;
+    this.currentPage = 1;
+    this.updatePagination();
   }
 
   onFiltreChange(): void {
     this.applyFilters();
+  }
+
+  updatePagination(): void {
+    const total = this.agentsFiltres.length;
+    this.totalPages = Math.max(1, Math.ceil(total / this.pageSize));
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+    }
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    this.agentsPage = this.agentsFiltres.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  goToPreviousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage -= 1;
+      this.updatePagination();
+    }
+  }
+
+  goToNextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage += 1;
+      this.updatePagination();
+    }
   }
 
   // Actions sur les alertes
@@ -225,7 +296,7 @@ export class Supervision implements OnInit {
           // Exclure l'agent actuel
           this.availableAgents = agents.filter(a => 
             a.id !== this.ticketToReassign?.assigneA && 
-            (a.role === 'agent' || a.role === 'agent_senior' || a.role === 'superviseur')
+            (a.role === 'agent' || a.role === 'superviseur')
           );
           this.selectedAgentId = '';
           this.reassignComment = '';
@@ -302,11 +373,9 @@ export class Supervision implements OnInit {
     const labels: { [key: string]: string } = {
       'admin': 'Administrateur',
       'superviseur': 'Superviseur',
-      'agent_senior': 'Agent Senior',
-      'agent': 'Agent',
-      'stagiaire': 'Stagiaire'
+      'agent': 'Agent'
     };
-    return labels[role] || role;
+    return labels[role] || 'Agent';
   }
 
   getAlerteTypeLabel(type: string): string {

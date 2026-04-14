@@ -9,15 +9,21 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 100;
+  left: 280px;
+  right: 0;
+  z-index: 900;
   box-shadow: var(--shadow-sm);
   backdrop-filter: blur(10px);
   box-sizing: border-box;
-  width: 100%;
+  width: auto;
   margin: 0;
   height: 80px;
+}
+
+.header.sidebar-collapsed {
+  left: 80px;
 }
 
 .header-left {
@@ -25,18 +31,6 @@
   align-items: center;
   gap: 1.5rem;
   flex: 1;
-}
-
-.header-logo {
-  width: 65px;
-  height: 65px;
-  object-fit: contain;
-  flex-shrink: 0;
-  transition: transform 0.3s ease;
-}
-
-.header-logo:hover {
-  transform: scale(1.05);
 }
 
 .menu-toggle {
@@ -138,8 +132,36 @@
 }
 
 .notification-button svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+}
+
+.notification-plusone {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  border: 2px solid var(--surface);
+  line-height: 1.1;
+  transform-origin: center;
+  animation: plusOnePop 0.22s ease-out;
+  pointer-events: none;
+}
+
+@keyframes plusOnePop {
+  from {
+    transform: scale(0.85);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .notification-badge {
@@ -419,6 +441,10 @@
 
 /* Responsive - Tablette */
 @media (max-width: 1024px) {
+  .header {
+    left: 0;
+  }
+
   .menu-toggle {
     display: flex;
   }
@@ -536,4 +562,101 @@
     width: 20px;
     height: 20px;
   }
+}
+
+/* Modale de confirmation déconnexion (remplace l’alerte navigateur) */
+.logout-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: logoutBackdropIn 0.2s ease;
+}
+
+@keyframes logoutBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.logout-dialog {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  max-width: 400px;
+  width: 100%;
+  padding: 1.5rem 1.75rem;
+  animation: logoutDialogIn 0.25s ease;
+}
+
+@keyframes logoutDialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.logout-dialog-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.logout-dialog-text {
+  margin: 0 0 1.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.logout-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.logout-dialog-btn {
+  padding: 0.625rem 1.125rem;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.logout-dialog-btn.cancel {
+  background: var(--background);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.logout-dialog-btn.cancel:hover {
+  background: var(--surface);
+}
+
+.logout-dialog-btn.confirm {
+  background: #ef4444;
+  color: #fff;
+}
+
+.logout-dialog-btn.confirm:hover {
+  background: #dc2626;
 }

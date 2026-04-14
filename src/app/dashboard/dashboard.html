@@ -40,24 +40,6 @@
     </div>
   </div>
 
-  <!-- Alertes et notifications -->
-  <div class="alerts-container" *ngIf="alerts.length > 0">
-    <div
-      *ngFor="let alert of alerts"
-      class="alert"
-      [class.alert-warning]="alert.type === 'warning'"
-      [class.alert-error]="alert.type === 'error'"
-      [class.alert-info]="alert.type === 'info'"
-      [class.alert-success]="alert.type === 'success'"
-    >
-      <div class="alert-content">
-        <span class="alert-message">{{ alert.message }}</span>
-        <span class="alert-time">{{ alert.timestamp | date:'HH:mm' }}</span>
-      </div>
-      <button class="alert-close" (click)="dismissAlert(alert.id)">×</button>
-    </div>
-  </div>
-
   <!-- Filtres -->
   <div class="filters-container">
     <div class="filters-header">

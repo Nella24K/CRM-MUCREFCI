@@ -1,0 +1,52 @@
+<div class="create-client-page">
+  <div class="header">
+    <div>
+      <h1>Créer un client</h1>
+      <p>Renseignez les informations du client puis validez.</p>
+    </div>
+    <button type="button" class="btn-secondary" (click)="goBack()">Retour</button>
+  </div>
+
+  <form class="form-card" (ngSubmit)="submit()">
+    <div class="grid">
+      <label>
+        Tag
+        <select name="selectedTag" [(ngModel)]="selectedTag" (change)="onTagSelectionChange()">
+          <option value="">Sélectionner un tag</option>
+          <option *ngFor="let tag of availableTags" [value]="tag">{{ tag }}</option>
+          <option [value]="newTagValue">+ Nouveau tag...</option>
+        </select>
+      </label>
+      <label *ngIf="selectedTag === newTagValue">
+        Nouveau tag
+        <input
+          type="text"
+          name="customTag"
+          [(ngModel)]="customTag"
+          placeholder="Premium"
+        />
+      </label>
+      <label>Matricule<input type="text" name="matricule" [(ngModel)]="formData.matricule" placeholder="MUC-2026-001" /></label>
+      <label>Prénom *<input type="text" name="firstname" [(ngModel)]="formData.firstname" placeholder="Mariam" required /></label>
+      <label>Nom *<input type="text" name="lastname" [(ngModel)]="formData.lastname" placeholder="Kouassi" required /></label>
+      <label>Date de naissance<input type="date" name="birthdate" [(ngModel)]="formData.birthdate" /></label>
+      <label>Lieu de naissance<input type="text" name="lieu_naissance" [(ngModel)]="formData.lieu_naissance" placeholder="Abidjan" /></label>
+      <label>Nationalité<input type="text" name="nationalite" [(ngModel)]="formData.nationalite" placeholder="Ivoirienne" /></label>
+      <label>Catégorie professionnelle<input type="text" name="categorie_professionnelle" [(ngModel)]="formData.categorie_professionnelle" placeholder="Commerçant" /></label>
+      <label>Statut<input type="text" name="status" [(ngModel)]="formData.status" placeholder="actif" /></label>
+      <label>Email *<input type="email" name="email" [(ngModel)]="formData.email" placeholder="mariam.kouassi@email.com" required /></label>
+      <label>Téléphone<input type="text" name="phone" [(ngModel)]="formData.phone" placeholder="+2250700000000" /></label>
+      <label>WhatsApp<input type="text" name="whatsapp" [(ngModel)]="formData.whatsapp" placeholder="+2250700000000" /></label>
+    </div>
+
+    <label class="full-width">Adresse<input type="text" name="adresse" [(ngModel)]="formData.adresse" placeholder="Cocody Riviera, Abidjan" /></label>
+
+    <div class="actions">
+      <button type="button" class="btn-secondary" (click)="goBack()" [disabled]="isSubmitting">Annuler</button>
+      <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">Créer le client</span>
+        <span *ngIf="isSubmitting">Création...</span>
+      </button>
+    </div>
+  </form>
+</div>

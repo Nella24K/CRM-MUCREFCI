@@ -1,0 +1,49 @@
+<div class="settings-page">
+  <div class="page-header">
+    <h1>Priorités</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-back" (click)="goToParametrages()">Retour</button>
+      <button type="button" class="btn-create" (click)="createPriority()" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Création...' : 'Créer une priorité' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="create-form">
+    <label for="priority-label">Label</label>
+    <input
+      id="priority-label"
+      type="text"
+      [(ngModel)]="newPriorityLabel"
+      placeholder="Urgente"
+      [disabled]="isSubmitting"
+    />
+  </div>
+
+  <p class="feedback success" *ngIf="successMessage">{{ successMessage }}</p>
+  <p class="feedback error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+  <div class="table-wrapper" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Délai cible</th>
+          <th>Tickets associés</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let priorite of priorites; trackBy: trackByPriority">
+          <td>{{ priorite.nom }}</td>
+          <td>{{ priorite.delai }}</td>
+          <td>{{ priorite.tickets }}</td>
+        </tr>
+        <tr *ngIf="priorites.length === 0">
+          <td colspan="3" class="empty-row">Aucune priorité disponible.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">Chargement des priorités...</div>
+</div>

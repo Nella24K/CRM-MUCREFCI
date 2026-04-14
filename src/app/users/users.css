@@ -200,6 +200,12 @@
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
+.filters-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
 .btn-reset {
   display: flex;
   align-items: center;
@@ -226,10 +232,263 @@
   height: 18px;
 }
 
-/* Liste utilisateurs */
-.users-list {
-  display: grid;
-  gap: 1.5rem;
+.users-table-container {
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
+  overflow-x: hidden;
+  padding: 0;
+}
+
+.pagination {
+  margin-top: 1rem;
+  background: var(--surface);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.pagination-info {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pagination-controls button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.current-page {
+  min-width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 0;
+  font-size: 0.9rem;
+}
+
+.users-table thead th {
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-primary);
+  background: #f1f5f9;
+  padding: 0.875rem 1rem;
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.users-table tbody td {
+  padding: 0.875rem 1rem;
+  vertical-align: middle;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.users-table tbody tr:hover td {
+  background: #f8fafc;
+}
+
+.users-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.users-table .col-actions,
+.users-table .cell-actions {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.users-table .cell-user {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Responsive (éviter le scroll horizontal) */
+@media (max-width: 1280px) {
+  .users-table {
+    min-width: 0;
+    table-layout: fixed;
+    border-spacing: 0 0.6rem;
+  }
+
+  .users-table thead th,
+  .users-table tbody td {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .users-table .col-email { width: 44%; }
+  .users-table .col-role { width: 20%; }
+  .users-table .col-status { width: 18%; }
+  .users-table .col-actions { width: 18%; }
+
+  .users-table .cell-email {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .users-table .table-actions {
+    justify-content: flex-end;
+    gap: 0.4rem;
+  }
+
+}
+
+@media (max-width: 900px) {
+  .users-table thead th,
+  .users-table tbody td {
+    padding: 0.7rem 0.75rem;
+  }
+
+  .users-table .col-email { width: 46%; }
+  .users-table .col-role { width: 20%; }
+  .users-table .col-status { width: 20%; }
+  .users-table .col-actions { width: 14%; }
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.user-cell-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 180px;
+}
+
+.users-table .user-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.users-table .cell-email,
+.users-table .cell-phone,
+.users-table .cell-team,
+.users-table .cell-date {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.users-table .cell-email {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+
+.users-table .user-email {
+  margin: 0;
+}
+
+.users-table .table-actions {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: flex-start;
+}
+
+.users-table .btn-action {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.users-table .btn-action svg {
+  width: 16px;
+  height: 16px;
+}
+
+.users-table .btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  justify-content: center;
+}
+
+.users-table .btn-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.users-table .btn-edit {
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+.users-table .btn-toggle {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.users-table .btn-delete {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.users-table .btn-edit:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.users-table .btn-toggle:hover {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.users-table .btn-delete:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.users-table .role-badge,
+.users-table .statut-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.users-table .cell-role,
+.users-table .cell-status {
+  vertical-align: middle;
 }
 
 .user-card {
@@ -267,6 +526,12 @@
   font-weight: 700;
   font-size: 1.25rem;
   flex-shrink: 0;
+}
+
+.users-table .user-avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 0.85rem;
 }
 
 .user-info {
@@ -317,19 +582,9 @@
   color: var(--warning-color);
 }
 
-.role-agent_senior {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--success-color);
-}
-
 .role-agent {
   background: rgba(37, 99, 235, 0.1);
   color: var(--primary-color);
-}
-
-.role-stagiaire {
-  background: rgba(100, 116, 139, 0.1);
-  color: var(--text-secondary);
 }
 
 .statut-badge {
@@ -610,6 +865,16 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.form-hint {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.form-hint.error {
+  color: var(--error-color);
+}
+
 .tags-container {
   display: flex;
   flex-wrap: wrap;
@@ -729,8 +994,9 @@
 
 .warning-text {
   color: var(--error-color);
-  font-weight: 600;
-  margin-top: 0.5rem;
+  font-weight: 500;
+  font-size: 0.82rem;
+  margin-top: 0.35rem;
 }
 
 /* Responsive */

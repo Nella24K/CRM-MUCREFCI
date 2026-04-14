@@ -1,9 +1,46 @@
 <div class="profil-page">
-  <!-- En-tête -->
   <div class="profil-header">
     <div class="header-title">
       <h1>MON PROFIL</h1>
-      <p class="subtitle">Gérez vos informations personnelles et préférences</p>
     </div>
+  </div>
+
+  <div class="profil-content profil-content-compact">
+    <section class="profil-section">
+      <h2 class="section-title">Compte</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Nom complet</span>
+          <span class="info-value">{{ (currentUser.prenom + ' ' + currentUser.nom).trim() || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ currentUser.email || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Rôle</span>
+          <span class="role-badge">{{ roleLabel }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="profil-section">
+      <h2 class="section-title">Mot de passe</h2>
+      <div class="preferences-grid">
+        <div class="preference-item">
+          <label class="preference-label">Nouveau</label>
+          <input class="preference-select" type="password" [(ngModel)]="passwordForm.newPassword" name="newPassword" />
+        </div>
+        <div class="preference-item">
+          <label class="preference-label">Confirmation</label>
+          <input class="preference-select" type="password" [(ngModel)]="passwordForm.confirmPassword" name="confirmPassword" />
+        </div>
+      </div>
+      <button class="btn-save" type="button" [disabled]="isSavingPassword" (click)="changePassword()">
+        <span *ngIf="!isSavingPassword">Changer</span>
+        <span *ngIf="isSavingPassword">...</span>
+      </button>
+    </section>
+
   </div>
 </div>

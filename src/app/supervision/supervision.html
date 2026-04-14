@@ -105,58 +105,51 @@
         <h2>Alertes nécessitant action</h2>
         <span class="alertes-count">{{ alertes.length }}</span>
       </div>
-      <div class="alertes-list">
-        <div *ngFor="let alerte of alertes" class="alerte-card" [ngClass]="getAlertePriorityClass(alerte.priorite)">
-          <div class="alerte-content">
-            <div class="alerte-header">
-              <span class="alerte-type">{{ getAlerteTypeLabel(alerte.type) }}</span>
-              <span class="alerte-priority" [ngClass]="'priority-' + alerte.priorite">
-                {{ alerte.priorite === 'haute' ? 'Haute' : alerte.priorite === 'moyenne' ? 'Moyenne' : 'Basse' }}
-              </span>
-            </div>
-            <h3 class="alerte-titre">{{ alerte.titre }}</h3>
-            <p class="alerte-message">{{ alerte.message }}</p>
-            <div class="alerte-date">{{ alerte.date | date:'dd/MM/yyyy HH:mm' }}</div>
-          </div>
-          <div class="alerte-actions">
-            <button 
-              *ngFor="let action of alerte.actions" 
-              class="btn-action"
-              [ngClass]="'btn-' + action.action"
-              (click)="handleAlerteAction(alerte, action.action)">
-              {{ action.label }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- KPIs -->
-    <div class="kpis-section">
-      <div class="section-header">
-        <h2>Indicateurs de performance</h2>
-      </div>
-      <div class="kpis-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">Temps moyen réponse</div>
-          <div class="kpi-value">1h25</div>
-          <div class="kpi-target">Objectif < 4h ✅</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">SLA respecté</div>
-          <div class="kpi-value">89%</div>
-          <div class="kpi-target">Objectif > 85% ✅</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Satisfaction</div>
-          <div class="kpi-value">4.3/5</div>
-          <div class="kpi-target">Objectif > 4.0 ✅</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Taux résolution 1er niveau</div>
-          <div class="kpi-value">72%</div>
-          <div class="kpi-target">Objectif > 70% ✅</div>
-        </div>
+      <div class="alertes-table-container">
+        <table class="alertes-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Priorité</th>
+              <th>Titre</th>
+              <th>Message</th>
+              <th>Date</th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let alerte of alertes" [ngClass]="getAlertePriorityClass(alerte.priorite)">
+              <td class="cell-type">
+                <span class="alerte-type">{{ getAlerteTypeLabel(alerte.type) }}</span>
+              </td>
+              <td class="cell-priority">
+                <span class="alerte-priority" [ngClass]="'priority-' + alerte.priorite">
+                  {{ alerte.priorite === 'haute' ? 'Haute' : alerte.priorite === 'moyenne' ? 'Moyenne' : 'Basse' }}
+                </span>
+              </td>
+              <td class="cell-title">
+                <span class="alerte-titre">{{ alerte.titre }}</span>
+              </td>
+              <td class="cell-message">
+                <span class="alerte-message">{{ alerte.message }}</span>
+              </td>
+              <td class="cell-date">
+                <span class="alerte-date">{{ alerte.date | date:'dd/MM/yyyy HH:mm' }}</span>
+              </td>
+              <td class="cell-actions">
+                <div class="alerte-actions">
+                  <button
+                    *ngFor="let action of alerte.actions"
+                    class="btn-action"
+                    [ngClass]="'btn-' + action.action"
+                    (click)="handleAlerteAction(alerte, action.action)">
+                    {{ action.label }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -193,7 +186,7 @@
         <span class="agents-count">{{ agentsFiltres.length }} agent(s)</span>
       </div>
       <div class="agents-grid">
-        <div *ngFor="let agent of agentsFiltres" class="agent-card" (click)="viewAgentDetail(agent.id)">
+        <div *ngFor="let agent of agentsPage" class="agent-card" (click)="viewAgentDetail(agent.id)">
           <div class="agent-card-header">
             <div class="agent-avatar">
               <span>{{ agent.prenom.charAt(0) }}{{ agent.nom.charAt(0) }}</span>
@@ -201,14 +194,14 @@
             <div class="agent-info">
               <h3 class="agent-name">{{ getUserDisplayName(agent) }}</h3>
               <p class="agent-email">{{ agent.email }}</p>
-            </div>
-            <div class="agent-badges">
-              <span class="role-badge" [ngClass]="'role-' + agent.role">
-                {{ getRoleLabel(agent.role) }}
-              </span>
-              <span class="statut-badge" [ngClass]="getStatutClass(agent.statut)">
-                {{ getStatutLabel(agent.statut) }}
-              </span>
+              <div class="agent-badges">
+                <span class="role-badge" [ngClass]="'role-' + agent.role">
+                  {{ getRoleLabel(agent.role) }}
+                </span>
+                <span class="statut-badge" [ngClass]="getStatutClass(agent.statut)">
+                  {{ getStatutLabel(agent.statut) }}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -240,6 +233,17 @@
             </div>
           </div>
         </div>
+      </div>
+      <div class="agents-pagination" *ngIf="agentsFiltres.length > pageSize">
+        <button class="btn-page" (click)="goToPreviousPage()" [disabled]="currentPage === 1">
+          Précédent
+        </button>
+        <div class="page-info">
+          Page <strong>{{ currentPage }}</strong> / {{ totalPages }}
+        </div>
+        <button class="btn-page" (click)="goToNextPage()" [disabled]="currentPage === totalPages">
+          Suivant
+        </button>
       </div>
     </div>
   </div>

@@ -5,7 +5,7 @@ export interface User {
   email: string;
   telephone?: string;
   photo?: string;
-  role: 'agent' | 'agent_senior' | 'superviseur' | 'admin' | 'stagiaire';
+  role: 'agent' | 'superviseur' | 'admin';
   statut: 'actif' | 'en_pause' | 'hors_ligne';
   dateEntree: Date;
   equipe?: string;

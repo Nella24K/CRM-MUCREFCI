@@ -1,0 +1,92 @@
+<div class="settings-page">
+  <div class="page-header">
+    <h1>Rôles</h1>
+    <div class="header-actions">
+      <button type="button" class="btn-back" (click)="goToParametrages()">Retour</button>
+      <button type="button" class="btn-create" (click)="openCreateModal()">Créer un rôle</button>
+    </div>
+  </div>
+
+  <p class="feedback error" *ngIf="loadErrorMessage">{{ loadErrorMessage }}</p>
+
+  <div class="table-wrapper">
+    <div class="table-loading" *ngIf="isLoading">Chargement des rôles...</div>
+    <table *ngIf="!isLoading">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Libellé</th>
+          <th>Niveau</th>
+          <th>Max tickets</th>
+          <th>Catégories</th>
+          <th>Utilisateurs</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="roles.length === 0">
+          <td colspan="7" class="empty-cell">Aucun rôle pour le moment.</td>
+        </tr>
+        <tr *ngFor="let role of roles">
+          <td>{{ role.code }}</td>
+          <td>{{ role.label }}</td>
+          <td>{{ role.niveau || '—' }}</td>
+          <td>{{ role.maxTickets }}</td>
+          <td>{{ role.categoriesDisplay }}</td>
+          <td>{{ role.utilisateurs }}</td>
+          <td>
+            <div class="table-actions">
+              <button type="button" class="btn-edit" (click)="openEditModal(role)">Modifier</button>
+              <button type="button" class="btn-delete" [disabled]="isDeleting" (click)="deleteRole(role)">
+                Supprimer
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showRoleModal" (click)="closeRoleModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditing ? 'Modifier le rôle' : 'Créer un rôle' }}</h2>
+      <button type="button" class="btn-close" [disabled]="isSaving" (click)="closeRoleModal()">x</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="feedback error" *ngIf="formErrorMessage">{{ formErrorMessage }}</p>
+
+      <div class="form-group">
+        <label for="role-label">Libellé</label>
+        <input id="role-label" type="text" [(ngModel)]="roleForm.label" />
+      </div>
+
+      <div class="form-group">
+        <label for="role-level">Niveau</label>
+        <input id="role-level" type="text" [(ngModel)]="roleForm.niveau" />
+      </div>
+
+      <div class="form-group">
+        <label for="role-maxTickets">Max tickets</label>
+        <input id="role-maxTickets" type="number" min="0" [(ngModel)]="roleForm.maxTickets" />
+      </div>
+
+      <div class="form-group">
+        <label for="role-category">Catégorie</label>
+        <select id="role-category" [(ngModel)]="roleForm.categoryId">
+          <option value="" disabled>Choisir une catégorie</option>
+          <option *ngFor="let category of categoryOptions" [value]="category.id">{{ category.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-back" [disabled]="isSaving" (click)="closeRoleModal()">Annuler</button>
+      <button type="button" class="btn-create" [disabled]="isSaving" (click)="submitRole()">
+        {{ isSaving ? 'Enregistrement...' : (isEditing ? 'Enregistrer' : 'Créer') }}
+      </button>
+    </div>
+  </div>
+</div>

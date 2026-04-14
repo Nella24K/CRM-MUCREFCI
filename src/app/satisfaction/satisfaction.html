@@ -1,2 +1,59 @@
-<div class="satisfaction">
+<div class="satisfaction-page">
+  <header class="satisfaction-header">
+    <div class="header-title">
+      <h1>SATISFACTION</h1>
+      <p class="subtitle">Clients satisfaits, avec une rangée qui défile</p>
+    </div>
+
+    <div class="rating-summary">
+      <div class="rating-value">{{ averageSatisfaction.toFixed(1) }}/5</div>
+      <div class="rating-stars" aria-label="Note moyenne sur 5">
+        <span
+          *ngFor="let i of [1,2,3,4,5]"
+          class="star"
+          [class.active]="i <= averageSatisfactionRounded"
+        >
+          ★
+        </span>
+      </div>
+      <div class="rating-meta">{{ avisClients.length }} avis au total</div>
+    </div>
+  </header>
+
+  <section class="ticker-card" aria-label="Clients satisfaits qui défilent">
+    <div class="ticker-head">
+      <span class="badge-dot"></span>
+      <div class="ticker-title">Satisfaits (4-5)</div>
+    </div>
+
+    <div class="ticker-window" *ngIf="satisfiedClients.length > 0">
+      <div class="ticker-track">
+        <div class="ticker-group">
+          <div class="client-pill" *ngFor="let c of satisfiedClients">
+            <div class="client-avatar">{{ getInitials(c.nom) }}</div>
+            <div class="client-meta">
+              <div class="client-name">{{ c.nom }}</div>
+              <div class="client-mode">{{ getSatisfactionModeLabel(c.note) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dupliquer pour boucle fluide -->
+        <div class="ticker-group">
+          <div class="client-pill" *ngFor="let c of satisfiedClients">
+            <div class="client-avatar">{{ getInitials(c.nom) }}</div>
+            <div class="client-meta">
+              <div class="client-name">{{ c.nom }}</div>
+              <div class="client-mode">{{ getSatisfactionModeLabel(c.note) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ticker-empty" *ngIf="satisfiedClients.length === 0">
+      Aucun client avec une note 4 ou 5 pour le moment.
+    </div>
+  </section>
 </div>
+

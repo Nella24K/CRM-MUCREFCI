@@ -1,0 +1,26 @@
+<div class="page">
+  <div class="header">
+    <h1>Détails client</h1>
+    <button type="button" (click)="back()">Retour</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loader">Chargement...</div>
+
+  <div class="card" *ngIf="!isLoading && client">
+    <div><span>Tag</span><strong>{{ client.tag || '—' }}</strong></div>
+    <div><span>Matricule</span><strong>{{ client.matricule || '—' }}</strong></div>
+    <div><span>Firstname</span><strong>{{ client.firstname || client.prenom || '—' }}</strong></div>
+    <div><span>Lastname</span><strong>{{ client.lastname || client.nom || '—' }}</strong></div>
+    <div><span>Birthdate</span><strong>{{ client.birthdate || '—' }}</strong></div>
+    <div><span>Lieu naissance</span><strong>{{ client.lieu_naissance || '—' }}</strong></div>
+    <div><span>Nationalité</span><strong>{{ client.nationalite || '—' }}</strong></div>
+    <div><span>Catégorie professionnelle</span><strong>{{ client.categorie_professionnelle || '—' }}</strong></div>
+    <div><span>Status</span><strong>{{ client.status || client.statut }}</strong></div>
+    <div><span>Email</span><strong>{{ client.email || '—' }}</strong></div>
+    <div><span>Phone</span><strong>{{ client.phone || client.telephone || '—' }}</strong></div>
+    <div><span>WhatsApp</span><strong>{{ client.whatsapp || '—' }}</strong></div>
+    <div class="full"><span>Adresse</span><strong>{{ client.adresse || '—' }}</strong></div>
+  </div>
+
+  <div class="loader" *ngIf="!isLoading && !client">Client introuvable.</div>
+</div>

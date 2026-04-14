@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Agent, AgentPerformance, TeamStats, Alerte } from '../models/agent';
 import { UserService } from './user';
@@ -10,10 +9,7 @@ import { User } from '../models/user';
   providedIn: 'root'
 })
 export class SupervisionService {
-  private apiUrl = 'api/supervision';
-
   constructor(
-    private http: HttpClient,
     private userService: UserService,
     private ticketService: TicketService
   ) {}
